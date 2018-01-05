@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    /* Basic Options */
+    "target": "es5",      // Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'.
+    "module": "umd", // Specify module code generation: 'none', commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'.
+    "lib": [              // Specify library files to be included in the compilation:
+      "dom",
+      "es6"
+    ],
+    "sourceMap": true,    // Generates corresponding '.map' file.
+
+    /* Strict Type-Checking Options */
+    "strict": true,            // Enable all strict type-checking options.
+    "strictNullChecks": false, // Enable strict null checks.
+
+    /* Module Resolution Options */
+    "moduleResolution": "node", // Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6).
+    "baseUrl": "./src",         // Base directory to resolve non-absolute module names.
+    "types": [                  // Type declaration files to be included in compilation.
+    ],
+    // "paths": {},                       // A series of entries which re-map imports to lookup locations relative to the 'baseUrl'.
+    "allowSyntheticDefaultImports": true, // Allow default imports from modules with no default export. This does not affect code emit, just typechecking.
+
+    /* Experimental Options */
+    "experimentalDecorators": true, // Enables experimental support for ES7 decorators.
+    "emitDecoratorMetadata": true   // Enables experimental support for emitting type metadata for decorators.
+  },
+  "exclude": [
+    "node_modules",
+    "build"
+  ],
+  "awesomeTypescriptLoaderOptions": {
+    "forkChecker": true,
+    "useWebpackText": true
+  },
+  "compileOnSave": false,
+  "buildOnSave": false,
+  "atom": {
+    "rewriteTsconfig": false
+  }
+}
