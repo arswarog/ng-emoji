@@ -1,5 +1,5 @@
 {
-  "name": "ng-emoji",
+  "name": "ngx-emoji",
   "version": "0.0.1",
   "description": "Components with Emoji for Angular 4+",
   "main": "index.js",
@@ -8,16 +8,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arswarog/ng-emoji.git"
+    "url": "git+https://github.com/arswarog/ngx-emoji.git"
   },
   "keywords": [
     "Emoji",
-    "Angular"
+    "Angular",
+    "Angular 4",
+    "Text input"
   ],
   "author": "Arswarog <arswarog@yandex.ru>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/arswarog/ng-emoji/issues"
+    "url": "https://github.com/arswarog/ngx-emoji/issues"
   },
-  "homepage": "https://github.com/arswarog/ng-emoji#readme"
+  "homepage": "https://github.com/arswarog/ngx-emoji#readme"
 }
