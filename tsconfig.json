@@ -27,7 +27,9 @@
   },
   "exclude": [
     "node_modules",
-    "build"
+    "bundles",
+    "demo",
+    "src/demo"
   ],
   "awesomeTypescriptLoaderOptions": {
     "forkChecker": true,

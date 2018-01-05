@@ -3,9 +3,10 @@ const path = require('path');
 /**
  * Webpack Plugins
  */
-const LoaderOptionsPlugin = require('webpack/lib/LoaderOptionsPlugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ContextReplacementPlugin = require('webpack/lib/ContextReplacementPlugin');
 const UglifyJsPlugin = require('webpack/lib/optimize/UglifyJsPlugin');
-const DtsBundleWebpack = require('dts-bundle-webpack')
+const WatchIgnorePlugin = require('webpack/lib/WatchIgnorePlugin');
 
 /**
  * Webpack configuration
@@ -27,8 +28,7 @@ module.exports = {
      * See: http://webpack.github.io/docs/configuration.html#entry
      */
     entry: {
-        'index.umd': path.resolve(__dirname, './src/main/index.ts'),
-        'index.umd.min': path.resolve(__dirname, './src/main/index.ts')
+        'demo': path.resolve(__dirname, './main.browser.ts')
     },
 
     /**
@@ -42,7 +42,7 @@ module.exports = {
          *
          * See: http://webpack.github.io/docs/configuration.html#output-path
          */
-        path: path.resolve(__dirname, './bundles'),
+        path: path.resolve(__dirname, './../../demo'),
 
         /**
          * Specifies the name of each output file on disk.
@@ -58,21 +58,7 @@ module.exports = {
          *
          * See: http://webpack.github.io/docs/configuration.html#output-sourcemapfilename
          */
-        sourceMapFilename: '[file].map',
-
-        /**
-         * Which format to export the library.
-         *
-         * @see: https://github.com/webpack/docs/wiki/configuration#outputlibrarytarget
-         */
-        libraryTarget: 'umd',
-
-        /**
-         * Name the AMD module.
-         *
-         * See: https://github.com/webpack/docs/wiki/configuration#outputumdnameddefine
-         */
-        umdNamedDefine: true
+        sourceMapFilename: '[file].map'
     },
 
     /**
@@ -89,7 +75,10 @@ module.exports = {
         extensions: ['.ts', '.js', '.json'],
 
         // An array of directory names to be resolved to the current directory
-        modules: ['src', 'node_modules']
+        modules: [
+            path.resolve(__dirname, '.'),
+            path.resolve(__dirname, './../../node_modules')
+        ]
     },
 
     /*
@@ -141,15 +130,11 @@ module.exports = {
                         loader: 'awesome-typescript-loader',
                         options: {
                             useCache: false,
-                            declaration: true, // Generates types file.
-                            outDir: "./bundles"
+                            configFileName: 'src/demo/tsconfig.json'
                         }
                     }
                 ],
-                exclude: [
-                    /\.(spec|e2e)\.ts$/,
-                    path.resolve(__dirname, "src/demo")
-                ]
+                exclude: [/\.(spec|e2e)\.ts$/]
             }
         ],
 
@@ -161,31 +146,38 @@ module.exports = {
     },
 
     /**
-     * The externals configuration option provides a way of excluding dependencies from the output bundles.
-     *
-     * @see: https://webpack.js.org/configuration/externals/
-     * @see: https://stackoverflow.com/a/38248500/1617101
-     */
-    externals: [
-        /^@angular\//,
-        /^rxjs\//
-    ],
-
-    /**
      * Add additional plugins to the compiler.
      *
      * See: http://webpack.github.io/docs/configuration.html#plugins
      */
     plugins: [
         /**
-         * Switch loaders to debug mode.
+         * Plugin: ContextReplacementPlugin
+         * Description: Provides context to Angular's use of System.import
          *
-         * See: https://webpack.js.org/plugins/loader-options-plugin/#options
+         * See: https://webpack.github.io/docs/list-of-plugins.html#contextreplacementplugin
+         * See: https://github.com/angular/angular/issues/11580
          */
-        new LoaderOptionsPlugin({
-            minimize: true,
-            debug: false,
-            options: {}
+        new ContextReplacementPlugin(
+            // The (\\|\/) piece accounts for path separators in *nix and Windows
+            // For Angular 5, see also https://github.com/angular/angular/issues/20357#issuecomment-343683491
+            /\@angular(\\|\/)core(\\|\/)esm5/,
+            path.resolve(__dirname, '.'), // location of your src
+            {}
+        ),
+
+        /**
+         * Plugin: HtmlWebpackPlugin
+         * Description: Simplifies creation of HTML files to serve your webpack bundles.
+         * This is especially useful for webpack bundles that include a hash in the filename
+         * which changes every compilation.
+         *
+         * See: https://github.com/ampedandwired/html-webpack-plugin
+         */
+        new HtmlWebpackPlugin({
+            template: path.resolve(__dirname, './index.html'),
+            chunksSortMode: 'dependency',
+            inject: 'body'
         }),
 
         /**
@@ -197,20 +189,6 @@ module.exports = {
          */
         // NOTE: To debug prod builds uncomment //debug lines and comment //prod lines
         new UglifyJsPlugin({
-            // beautify: true, //debug
-            // mangle: false, //debug
-            // dead_code: false, //debug
-            // unused: false, //debug
-            // deadCode: false, //debug
-            // compress: {
-            //   screw_ie8: true,
-            //   keep_fnames: true,
-            //   drop_debugger: false,
-            //   dead_code: false,
-            //   unused: false
-            // }, // debug
-            // comments: true, //debug
-            test: 'index.umd.min.js',
             beautify: false, //prod
             mangle: {screw_ie8: true, keep_fnames: true}, //prod
             compress: {screw_ie8: true}, //prod
@@ -219,32 +197,30 @@ module.exports = {
         }),
 
         /**
-         * Export TypeScript .d.ts files as an external module definition
+         * Ignore the main bundle
          *
-         * See: https://github.com/Appius/dts-bundle-webpack
-         * See: https://github.com/TypeStrong/dts-bundle
+         * See: https://webpack.js.org/plugins/watch-ignore-plugin/
          */
-        new DtsBundleWebpack({
-            name: 'ngx-emoji', // name of module like in package.json
-            main: 'bundles/index.d.ts', // path to entry-point (generated .d.ts file for main module)
-            baseDir: 'bundles', // base directory to be used for discovering type declarations
-            removeSource: true, // delete all source typings (i.e. "<baseDir>/**/*.d.ts")
-            out: 'index.d.ts' // path of output file.
-        })
+        new WatchIgnorePlugin([
+            path.resolve(__dirname, '../main')
+        ])
     ],
 
     /**
-     * Include polyfills or mocks for various node stuff
-     * Description: Node configuration
+     * Webpack Development Server configuration
+     * Description: The webpack-dev-server is a little node.js Express server.
+     * The server emits information about the compilation state to the client,
+     * which reacts to those events.
      *
-     * See: https://webpack.github.io/docs/configuration.html#node
+     * See: https://webpack.github.io/docs/webpack-dev-server.html
      */
-    node: {
-        global: true,
-        crypto: 'empty',
-        process: true,
-        module: false,
-        clearImmediate: false,
-        setImmediate: false
+    devServer: {
+        host: 'localhost',
+        port: 3000,
+        watchOptions: {
+            aggregateTimeout: 300,
+            poll: 1000
+        },
+        historyApiFallback: true
     }
 };
