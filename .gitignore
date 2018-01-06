@@ -2,5 +2,5 @@
 /ngx-emoji.iml
 /node_modules/
 /package-lock.json
-/bundles/
+#/bundles/
 /demo/
