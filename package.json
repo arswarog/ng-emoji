@@ -2,7 +2,7 @@
   "name": "ngx-emoji",
   "version": "0.0.1",
   "description": "Components with Emoji for Angular 4+",
-  "main": "./bundles/index.umd.js.min",
+  "main": "./bundles/index.umd.min.js",
   "typings": "./bundles/index.d.ts",
   "scripts": {
     "rimraf": "rimraf",
