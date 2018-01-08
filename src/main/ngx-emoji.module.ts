@@ -1,13 +1,17 @@
 import { NgModule } from '@angular/core';
-import { PrettyInputComponent } from './pretty-input.component';
-import { PrettyTextComponent } from './pretty-text.component'
+//import { CommonModule } from '@angular/common';
+import { EmojiPickerComponent } from './emoji-picker.component'
+import { NgxEmojiDirective } from './ngx-emoji.directive'
 
 @NgModule({
+    imports: [
+        //CommonModule
+    ],
     declarations: [
-        PrettyInputComponent, PrettyTextComponent
+        EmojiPickerComponent, NgxEmojiDirective
     ],
     exports: [
-        PrettyInputComponent, PrettyTextComponent
+        EmojiPickerComponent, NgxEmojiDirective
     ]
 })
 export class NgxEmojiModule {

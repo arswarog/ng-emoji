@@ -1,3 +1,3 @@
 export { NgxEmojiModule } from './ngx-emoji.module';
-export { PrettyInputComponent } from './pretty-input.component';
-export { PrettyTextComponent } from './pretty-text.component'
+export { EmojiPickerComponent } from './emoji-picker.component'
+export { NgxEmojiDirective } from './ngx-emoji.directive'

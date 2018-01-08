@@ -1,0 +1,74 @@
+<main role="main" class="container mb-3 mt-3">
+    <div class="card mb-3">
+        <div class="card-header">Emoji picker</div>
+        <div class="card-body">
+            <ngx-emoji-picker></ngx-emoji-picker>
+        </div>
+        <div class="card-footer">
+            <code>
+                &lt;ngx-emoji-picker&gt;&lt;/ngx-emoji-picker&gt;
+            </code>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">View</div>
+                <div class="card-body" ngxEmoji>
+                    Pretty text
+                </div>
+                <div class="card-footer">
+                    <code>
+                        &lt;div ngxEmoji&gt;Pretty text&lt;/div&gt;
+                    </code>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Edit</div>
+                <div class="card-body" contenteditable="true" ngxEmoji>
+                    Input text
+                </div>
+                <div class="card-footer">
+                    <code>
+                        &lt;div contenteditable="true" ngxEmoji&gt;Input text&lt;/div&gt;
+                    </code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Dynamic view / edit</div>
+        <div class="card-body" [attr.contenteditable]="editable" ngxEmoji>
+            Dynamic text
+        </div>
+        <div class="card-body">
+            <button type="button" class="btn btn-primary"
+                    [class.active]="!editable" (click)="editable=false">View
+            </button>
+            <button type="button" class="btn btn-primary"
+                    [class.active]="editable" (click)="editable=true">Edit
+            </button>
+        </div>
+        <div class="card-footer">
+            <pre><code>
+&#64;Component(&#123;
+  selector: 'body',
+  templateUrl: './app.html'
+})
+export class AppComponent &#123;
+  protected editable: boolean = false;
+}
+            </code></pre>
+            <p><code>
+                &lt;div [contenteditable]="editable" ngxEmoji&gt;Dynamic field 2&lt;/div&gt;
+            </code></p>
+            OR
+            <p><code>
+                &lt;div [attr.contenteditable]="editable" ngxEmoji&gt;Dynamic field 1&lt;/div&gt;
+            </code></p>
+        </div>
+    </div>
+</main>

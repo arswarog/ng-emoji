@@ -4,14 +4,14 @@ import { AppComponent } from './app.component'
 import { NgxEmojiModule } from 'main/index';
 
 @NgModule({
-    bootstrap: [AppComponent],
-    declarations: [
-        AppComponent
-    ],
     imports: [
         BrowserModule,
         NgxEmojiModule
-    ]
+    ],
+    declarations: [
+        AppComponent
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule {
 }

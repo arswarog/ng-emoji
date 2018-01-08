@@ -5,6 +5,16 @@ const path = require('path');
  */
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ContextReplacementPlugin = require('webpack/lib/ContextReplacementPlugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+
+/**
+ * Extract the style sheets into a dedicated file
+ *
+ * See: https://github.com/webpack-contrib/less-loader#in-production
+ */
+const extractLess = new ExtractTextPlugin({
+    filename: "[name].css"
+});
 
 /**
  * Webpack configuration
@@ -136,9 +146,42 @@ module.exports = {
                             useCache: false,
                             configFileName: 'tsconfig.demo.json'
                         }
+                    },
+                    {
+                        loader: 'angular2-template-loader'
                     }
                 ],
                 exclude: [/\.(spec|e2e)\.ts$/]
+            },
+
+            /**
+             * Raw loader support for *.html
+             * Returns file content as string
+             *
+             * See: https://github.com/webpack/raw-loader
+             */
+            {
+                test: /\.html$/,
+                loader: 'raw-loader',
+                exclude: [path.resolve(__dirname, './src/demo/index.html')]
+            },
+
+            /**
+             * Less loader
+             *
+             * See: https://github.com/webpack-contrib/less-loader#examples
+             */
+            {
+                test: /\.less$/,
+                use: extractLess.extract({
+                    use: [{
+                        loader: "css-loader"
+                    }, {
+                        loader: "less-loader"
+                    }],
+                    // use style-loader in development
+                    fallback: "style-loader"
+                })
             }
         ]
     },
@@ -176,7 +219,14 @@ module.exports = {
             template: path.resolve(__dirname, './src/demo/index.html'),
             chunksSortMode: 'dependency',
             inject: 'body'
-        })
+        }),
+
+        /**
+         * Extract Less plugin
+         *
+         * See: https://github.com/webpack-contrib/less-loader#in-production
+         */
+        extractLess
     ],
 
     /**
