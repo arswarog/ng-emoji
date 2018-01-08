@@ -1,6 +1,8 @@
 import {Component} from '@angular/core';
 
-@Component({})
+@Component({
+    template: '234'
+})
 export class PrettyTextComponent {
     //
 }

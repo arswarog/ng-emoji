@@ -3,10 +3,12 @@ import { PrettyInputComponent } from './pretty-input.component';
 import { PrettyTextComponent } from './pretty-text.component'
 
 @NgModule({
+    declarations: [
+        PrettyInputComponent, PrettyTextComponent
+    ],
     exports: [
         PrettyInputComponent, PrettyTextComponent
     ]
 })
 export class NgxEmojiModule {
-
 }
