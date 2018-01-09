@@ -2,6 +2,7 @@ import { Component, OnDestroy, ElementRef, Input, Output, EventEmitter, HostList
 import { NgxEmojiService } from "./ngx-emoji.service";
 import { NgxHtmlConverter } from "./ngx-html.converter";
 import { Subscription } from "rxjs/Subscription";
+import { NgxEmojiPickerComponent } from "./ngx-emoji-picker.component";
 
 export interface EnterOn {
     shift?: boolean;
@@ -52,6 +53,20 @@ export class NgxEmojiComponent implements OnDestroy {
         service.setActiveComponent(this);
         let component = this;
         let subscription = service.onEmojiPicked.subscribe(function (emoji: string) {
+            component.insertEmoji(emoji);
+        });
+        this.emojiServiceSubscription.add(subscription);
+    }
+
+    @Input('picker')
+    protected set inputPicker(pickerComponent: NgxEmojiPickerComponent) {
+        this.emojiServiceSubscription.unsubscribe();
+        this.emojiServiceSubscription = new Subscription();
+        this.emojiService = new NgxEmojiService();
+        this.emojiService.setActiveComponent(this);
+        pickerComponent.setEmojiService(this.emojiService);
+        let component = this;
+        let subscription = this.emojiService.onEmojiPicked.subscribe(function (emoji: string) {
             component.insertEmoji(emoji);
         });
         this.emojiServiceSubscription.add(subscription);

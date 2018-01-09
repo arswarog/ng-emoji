@@ -139,7 +139,7 @@ export class AppComponent &#123;
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card">
+            <div class="card mb-3">
                 <div class="card-header">Chat emoji picker</div>
                 <div class="card-body">
                     <ngx-emoji-picker [for]="chatInput"></ngx-emoji-picker>
@@ -148,6 +148,21 @@ export class AppComponent &#123;
                     <code class="text-primary">
                         &lt;ngx-emoji-picker [for]="chatInput"&gt;&lt;/ngx-emoji-picker&gt;
                     </code>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Personal emoji picker</div>
+                <div class="card-body">
+                    <ngx-emoji contenteditable="true" [picker]="personalPicker" [text]="'Text'"></ngx-emoji>
+                    <hr>
+                    <ngx-emoji-picker #personalPicker></ngx-emoji-picker>
+                </div>
+                <div class="card-footer">
+                    <pre><code class="text-primary">&lt;ngx-emoji contenteditable="true"
+[picker]="personalPicker"&gt;&lt;/ngx-emoji&gt;
+
+&lt;ngx-emoji-picker #personalPicker&gt;&lt;/ngx-emoji-picker&gt;</code></pre>
                 </div>
             </div>
         </div>

@@ -13,6 +13,10 @@ export class NgxEmojiPickerComponent {
     ) {
     }
 
+    public setEmojiService(service: NgxEmojiService): void {
+        this.emojiService = service;
+    }
+
     @Input('for')
     protected set inputFor(emojiComponent: NgxEmojiComponent) {
         this.emojiService = new NgxEmojiService();
