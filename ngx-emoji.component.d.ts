@@ -1,7 +1,8 @@
-import { ElementRef, EventEmitter } from '@angular/core';
+import { OnDestroy, ElementRef, EventEmitter } from '@angular/core';
 import { NgxEmojiService } from "./ngx-emoji.service";
 import { NgxHtmlConverter } from "./ngx-html.converter";
 import { Subscription } from "rxjs/Subscription";
+import { NgxEmojiPickerComponent } from "./ngx-emoji-picker.component";
 export interface EnterOn {
     shift?: boolean;
     ctrl?: boolean;
@@ -10,16 +11,18 @@ export interface SelectionRange {
     start: number;
     stop: number;
 }
-export declare class NgxEmojiComponent {
+export declare class NgxEmojiComponent implements OnDestroy {
     protected elRef: ElementRef;
     private contenteditable;
     private enterOn;
     protected readonly htmlConverter: NgxHtmlConverter;
     protected emojiService: NgxEmojiService;
-    protected globalEmojiServiceSubscription: Subscription;
+    protected emojiServiceSubscription: Subscription;
     protected lastSelectionRange: SelectionRange;
     constructor(elRef: ElementRef, globalEmojiService: NgxEmojiService);
+    ngOnDestroy(): void;
     addEmojiService(service: NgxEmojiService): void;
+    protected inputPicker: NgxEmojiPickerComponent;
     protected attrContenteditable: boolean;
     protected inputContenteditable: boolean;
     protected inputEnterOn: EnterOn;

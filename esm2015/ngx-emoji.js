@@ -1,6 +1,6 @@
 import { Component, ElementRef, EventEmitter, HostListener, Injectable, Input, NgModule, Output } from '@angular/core';
 import { Subject as Subject$1 } from 'rxjs/Subject';
-import 'rxjs/Subscription';
+import { Subscription as Subscription$1 } from 'rxjs/Subscription';
 
 /**
  * @fileoverview added by tsickle
@@ -60,6 +60,7 @@ class NgxEmojiComponent {
             ctrl: false
         };
         this.htmlConverter = new NgxHtmlConverter();
+        this.emojiServiceSubscription = new Subscription$1();
         this.lastSelectionRange = {
             start: 0,
             stop: 0
@@ -70,24 +71,44 @@ class NgxEmojiComponent {
         let /** @type {?} */ component = this;
         globalEmojiService.setActiveComponent(this);
         this.emojiService = globalEmojiService;
-        this.globalEmojiServiceSubscription = this.emojiService.onEmojiPicked.subscribe(function (emoji) {
+        let /** @type {?} */ subscription = this.emojiService.onEmojiPicked.subscribe(function (emoji) {
             component.insertEmoji(emoji);
         });
+        this.emojiServiceSubscription.add(subscription);
+    }
+    /**
+     * @return {?}
+     */
+    ngOnDestroy() {
+        this.emojiServiceSubscription.unsubscribe();
     }
     /**
      * @param {?} service
      * @return {?}
      */
     addEmojiService(service) {
-        if (this.globalEmojiServiceSubscription) {
-            this.globalEmojiServiceSubscription.unsubscribe();
-        }
         service.setActiveComponent(this);
-        this.emojiService = service;
         let /** @type {?} */ component = this;
-        service.onEmojiPicked.subscribe(function (emoji) {
+        let /** @type {?} */ subscription = service.onEmojiPicked.subscribe(function (emoji) {
             component.insertEmoji(emoji);
         });
+        this.emojiServiceSubscription.add(subscription);
+    }
+    /**
+     * @param {?} pickerComponent
+     * @return {?}
+     */
+    set inputPicker(pickerComponent) {
+        this.emojiServiceSubscription.unsubscribe();
+        this.emojiServiceSubscription = new Subscription$1();
+        this.emojiService = new NgxEmojiService();
+        this.emojiService.setActiveComponent(this);
+        pickerComponent.setEmojiService(this.emojiService);
+        let /** @type {?} */ component = this;
+        let /** @type {?} */ subscription = this.emojiService.onEmojiPicked.subscribe(function (emoji) {
+            component.insertEmoji(emoji);
+        });
+        this.emojiServiceSubscription.add(subscription);
     }
     /**
      * @param {?} editable
@@ -319,7 +340,15 @@ class NgxEmojiComponent {
 NgxEmojiComponent.decorators = [
     { type: Component, args: [{
                 selector: 'ngx-emoji',
-                template: ''
+                template: '',
+                styles: [`ngx-emoji,
+ngx-emoji-picker {
+  display: block;
+}
+ngx-emoji {
+  white-space: pre-wrap;
+}
+`]
             },] },
 ];
 /** @nocollapse */
@@ -328,6 +357,7 @@ NgxEmojiComponent.ctorParameters = () => [
     { type: NgxEmojiService, },
 ];
 NgxEmojiComponent.propDecorators = {
+    "inputPicker": [{ type: Input, args: ['picker',] },],
     "attrContenteditable": [{ type: Input, args: ['attr.contenteditable',] },],
     "inputContenteditable": [{ type: Input, args: ['contenteditable',] },],
     "inputEnterOn": [{ type: Input, args: ['enterOn',] },],
@@ -383,6 +413,13 @@ class NgxEmojiPickerComponent {
         this.emojiService = emojiService;
     }
     /**
+     * @param {?} service
+     * @return {?}
+     */
+    setEmojiService(service) {
+        this.emojiService = service;
+    }
+    /**
      * @param {?} emojiComponent
      * @return {?}
      */
@@ -420,7 +457,6 @@ NgxEmojiPickerComponent.propDecorators = {
  * @suppress {checkTypes} checked by tsc
  */
 //import { CommonModule } from '@angular/common';
-require('./ngx-emoji.less');
 class NgxEmojiModule {
 }
 NgxEmojiModule.decorators = [
