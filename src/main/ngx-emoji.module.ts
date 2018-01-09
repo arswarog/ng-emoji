@@ -4,7 +4,7 @@ import { NgxEmojiPickerComponent } from './ngx-emoji-picker.component';
 import { NgxEmojiComponent } from './ngx-emoji.component';
 import { NgxEmojiService } from './ngx-emoji.service';
 
-require('./ngx-emoji.less');
+import 'main/ngx-emoji.less';
 
 @NgModule({
     imports: [
