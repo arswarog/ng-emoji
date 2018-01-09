@@ -3,12 +3,12 @@ import { NgxEmojiService } from "./ngx-emoji.service";
 import { NgxHtmlConverter } from "./ngx-html.converter";
 import { Subscription } from "rxjs/Subscription";
 
-interface EnterOn {
+export interface EnterOn {
     shift?: boolean;
     ctrl?: boolean;
 }
 
-interface SelectionRange {
+export interface SelectionRange {
     start: number;
     stop: number;
 }
