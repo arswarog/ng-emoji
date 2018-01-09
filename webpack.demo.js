@@ -13,7 +13,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
  * See: https://github.com/webpack-contrib/less-loader#in-production
  */
 const extractLess = new ExtractTextPlugin({
-    filename: "[name].css"
+    filename: "[name].[contenthash].css"
 });
 
 /**
@@ -58,7 +58,14 @@ module.exports = {
          *
          * See: http://webpack.github.io/docs/configuration.html#output-filename
          */
-        filename: '[name].js',
+        filename: '[name].[chunkhash].js',
+
+        /**
+         * Chunk filename with hash.
+         *
+         * See: https://github.com/webpack/webpack/tree/master/examples/chunkhash#webpackconfigjs
+         */
+        chunkFilename: "[chunkhash].js",
 
         /**
          * The filename of the SourceMaps for the JavaScript files.
