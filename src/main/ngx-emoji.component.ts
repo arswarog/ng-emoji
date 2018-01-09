@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, OnDestroy, ElementRef, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { NgxEmojiService } from "./ngx-emoji.service";
 import { NgxHtmlConverter } from "./ngx-html.converter";
 import { Subscription } from "rxjs/Subscription";
@@ -17,7 +17,7 @@ export interface SelectionRange {
     selector: 'ngx-emoji',
     template: ''
 })
-export class NgxEmojiComponent {
+export class NgxEmojiComponent implements OnDestroy {
     private contenteditable: boolean = false;
     private enterOn: EnterOn = {
         shift: false,
@@ -25,7 +25,7 @@ export class NgxEmojiComponent {
     };
     protected readonly htmlConverter = new NgxHtmlConverter();
     protected emojiService: NgxEmojiService;
-    protected globalEmojiServiceSubscription: Subscription;
+    protected emojiServiceSubscription: Subscription = new Subscription();
     protected lastSelectionRange: SelectionRange = {
         start: 0,
         stop: 0
@@ -38,21 +38,23 @@ export class NgxEmojiComponent {
         let component = this;
         globalEmojiService.setActiveComponent(this);
         this.emojiService = globalEmojiService;
-        this.globalEmojiServiceSubscription = this.emojiService.onEmojiPicked.subscribe(function (emoji: string) {
+        let subscription = this.emojiService.onEmojiPicked.subscribe(function (emoji: string) {
             component.insertEmoji(emoji);
         });
+        this.emojiServiceSubscription.add(subscription);
+    }
+
+    public ngOnDestroy(): void {
+        this.emojiServiceSubscription.unsubscribe();
     }
 
     public addEmojiService(service: NgxEmojiService): void {
-        if (this.globalEmojiServiceSubscription) {
-            this.globalEmojiServiceSubscription.unsubscribe();
-        }
         service.setActiveComponent(this);
-        this.emojiService = service;
         let component = this;
-        service.onEmojiPicked.subscribe(function (emoji: string) {
+        let subscription = service.onEmojiPicked.subscribe(function (emoji: string) {
             component.insertEmoji(emoji);
         });
+        this.emojiServiceSubscription.add(subscription);
     }
 
     @Input('attr.contenteditable')
