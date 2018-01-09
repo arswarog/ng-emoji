@@ -1,6 +1,6 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core'), require('rxjs/Subject'), require('rxjs/Subscription')) :
-	typeof define === 'function' && define.amd ? define(['exports', '@angular/core', 'rxjs/Subject', 'rxjs/Subscription'], factory) :
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core'), require('rxjs/Subject'), require('rxjs/Subscription'), require('main/ngx-emoji.less')) :
+	typeof define === 'function' && define.amd ? define(['exports', '@angular/core', 'rxjs/Subject', 'rxjs/Subscription', 'main/ngx-emoji.less'], factory) :
 	(factory((global['ngx-emoji'] = {}),global.ng.core,global.Rx,global.Rx));
 }(this, (function (exports,core,Subject,Subscription) { 'use strict';
 
@@ -363,8 +363,7 @@ var NgxEmojiComponent = /** @class */ (function () {
 NgxEmojiComponent.decorators = [
     { type: core.Component, args: [{
                 selector: 'ngx-emoji',
-                template: '',
-                styles: ["ngx-emoji,\nngx-emoji-picker {\n  display: block;\n}\nngx-emoji {\n  white-space: pre-wrap;\n}\n"]
+                template: ''
             },] },
 ];
 /** @nocollapse */

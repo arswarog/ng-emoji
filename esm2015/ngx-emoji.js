@@ -1,6 +1,7 @@
 import { Component, ElementRef, EventEmitter, HostListener, Injectable, Input, NgModule, Output } from '@angular/core';
 import { Subject as Subject$1 } from 'rxjs/Subject';
 import { Subscription as Subscription$1 } from 'rxjs/Subscription';
+import 'main/ngx-emoji.less';
 
 /**
  * @fileoverview added by tsickle
@@ -340,15 +341,7 @@ class NgxEmojiComponent {
 NgxEmojiComponent.decorators = [
     { type: Component, args: [{
                 selector: 'ngx-emoji',
-                template: '',
-                styles: [`ngx-emoji,
-ngx-emoji-picker {
-  display: block;
-}
-ngx-emoji {
-  white-space: pre-wrap;
-}
-`]
+                template: ''
             },] },
 ];
 /** @nocollapse */
