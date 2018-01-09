@@ -1,3 +1,4 @@
 export { NgxEmojiModule } from './ngx-emoji.module';
-export { EmojiPickerComponent } from './emoji-picker.component'
-export { NgxEmojiDirective } from './ngx-emoji.directive'
+export { NgxEmojiPickerComponent } from './ngx-emoji-picker.component';
+export { NgxEmojiComponent } from './ngx-emoji.component';
+export { NgxEmojiService } from './ngx-emoji.service';
