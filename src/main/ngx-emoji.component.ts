@@ -171,6 +171,10 @@ export class NgxEmojiComponent implements OnDestroy {
     public set text(text: string) {
         text = this.htmlConverter.filterHtml(text);
         text = this.replaceAll(text, '  ', '&nbsp;&nbsp;');
+        for(let i = 0; i < text.length; i++) {
+            let code = text.codePointAt(i);
+            //console.log(code);
+        }
         let paragraphs = text.split('\n');
         text = '';
         for (let paragraph of paragraphs) {
@@ -193,21 +197,11 @@ export class NgxEmojiComponent implements OnDestroy {
     }
 
     public get text(): string {
-        /*console.log(String.fromCodePoint(parseInt('0x1F17F', 16), parseInt('0xFE0F', 16)));
-        console.log(String.fromCodePoint(
-            parseInt('0x0037', 16),
-            parseInt('0xFE0F', 16),
-            parseInt('0x20E3', 16)
-        ));
-        console.log(String.fromCodePoint(parseInt('0x1F195', 16)));*/
-
         let html = document.createElement('div');
         html.innerHTML = this.getNativeElement().innerHTML;
 
-        let img = html.getElementsByTagName('img').item(0);
-        while (img) {
+        for (let img of this.arrayOfNodeList(html.getElementsByTagName('img'))) {
             if (!img.classList.contains('ngx-emoji')) {
-                img = html.getElementsByTagName('img').item(0);
                 continue;
             }
             let emoji = '';
@@ -216,22 +210,9 @@ export class NgxEmojiComponent implements OnDestroy {
                     emoji = img.classList.item(i).substr(10);
                 }
             }
-            if (!emoji) {
-                emoji = '�';
-            } else {
-                let emojiCodes = emoji.split('-').map(function (value) {
-                    return parseInt('0x' + value, 16);
-                });
-                try {
-                    emoji = String.fromCodePoint.apply(String, emojiCodes);
-                } catch (error) {
-                    console.warn('Convert emoji ' + emoji + ' error: ' + error.message);
-                    emoji = '�';
-                }
-            }
+            emoji = this.createEmojiUtf(emoji);
             img.parentElement.insertBefore(document.createTextNode(emoji), img);
             img.remove();
-            img = html.getElementsByTagName('img').item(0);
         }
 
         html.innerHTML = this.getHtmlWithoutParagraphs(html).innerHTML;
@@ -256,10 +237,8 @@ export class NgxEmojiComponent implements OnDestroy {
         let html = document.createElement('div');
         html.innerHTML = this.getNativeElement().innerHTML;
 
-        let img = html.getElementsByTagName('img').item(0);
-        while (img) {
+        for (let img of this.arrayOfNodeList(html.getElementsByTagName('img'))) {
             if (!img.classList.contains('ngx-emoji')) {
-                img = html.getElementsByTagName('img').item(0);
                 continue;
             }
             let emoji = document.createElement('i');
@@ -267,7 +246,6 @@ export class NgxEmojiComponent implements OnDestroy {
             emoji.setAttribute('aria-hidden', 'true');
             img.parentElement.insertBefore(emoji, img);
             img.remove();
-            img = html.getElementsByTagName('img').item(0);
         }
 
         return html.innerHTML;
@@ -292,8 +270,27 @@ export class NgxEmojiComponent implements OnDestroy {
         return null;
     }
 
+    protected isSameEntities(a: NgxEmojiEntity[], b: NgxEmojiEntity[]): boolean {
+        for (let _a of a) {
+            let found = false;
+            for (let _b of b) {
+                if (_a.type == _b.type && _a.length == _b.length && _a.offset == _b.offset) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Input('entities')
     public set entities(entities: NgxEmojiEntity[]) {
+        if (this.isSameEntities(entities, this.entities)) {
+            return;
+        }
         let component = this;
         entities = entities.filter(function (entity) {
             entity.type = component.normalizeEntityType(entity.type);
@@ -347,10 +344,10 @@ export class NgxEmojiComponent implements OnDestroy {
     }
 
     public get entities(): NgxEmojiEntity[] {
+        let component = this;
         let entities: NgxEmojiEntity[] = [];
         let rf = function (nodes: NodeList, offset: number): void {
-            for (let i = 0; i < nodes.length; i++) {
-                let node = nodes.item(i);
+            for (let node of component.arrayOfNodeList(nodes)) {
                 if (node.textContent.trim().length > 0) {
                     let nodeName = node.nodeName.toUpperCase();
                     if (nodeName == 'B' || nodeName == 'STRONG') {
@@ -489,6 +486,14 @@ export class NgxEmojiComponent implements OnDestroy {
      * Internal
      */
 
+    protected arrayOfNodeList<T extends Node>(list: NodeListOf<T>): T[] {
+        let result: T[] = [];
+        for (let i = 0; i < list.length; i++) {
+            result.push(list.item(i))
+        }
+        return result;
+    }
+
     protected isBlockNode(node: Node): boolean {
         return node instanceof HTMLElement
             && window.getComputedStyle(node, '').display == 'block';
@@ -498,8 +503,7 @@ export class NgxEmojiComponent implements OnDestroy {
         let html = '';
         let component = this;
         let rf = function (nodes: NodeList): void {
-            for (let i = 0; i < nodes.length; i++) {
-                let node = nodes.item(i);
+            for (let node of component.arrayOfNodeList(nodes)) {
                 if (node.hasChildNodes()) {
                     html += '<' + node.nodeName + '>';
                     rf(node.childNodes); // recursion...
@@ -545,6 +549,30 @@ export class NgxEmojiComponent implements OnDestroy {
         this.execCommand('insertParagraph');
     }
 
+    protected createEmojiImg(emoji: string): string {
+        return '<img class="ngx-emoji ngx-emoji-' + emoji + '" ' +
+            'aria-hidden="true" ' +
+            'alt="' + this.createEmojiUtf(emoji) + '" ' +
+            'src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">';
+    }
+
+    protected createEmojiUtf(emoji: string): string {
+        emoji = emoji.trim();
+        if (emoji.length == 0) {
+            return '�';
+        }
+        let emojiCodes = emoji.split('-').map(function (value) {
+            return parseInt('0x' + value, 16);
+        });
+        try {
+            emoji = String.fromCodePoint.apply(String, emojiCodes);
+        } catch (error) {
+            console.warn('Convert emoji ' + emoji + ' error: ' + error.message);
+            emoji = '�';
+        }
+        return emoji;
+    }
+
     protected insertEmoji(emoji: string): void {
         if (!this.contenteditable) {
             return;
@@ -554,7 +582,7 @@ export class NgxEmojiComponent implements OnDestroy {
         selection.addRange(this.lastSelectionRange);
         this.execCommand(
             'insertHTML',
-            '<img class="ngx-emoji ngx-emoji-' + emoji + '" aria-hidden="true">'
+            this.createEmojiImg(emoji)
         );
     }
 

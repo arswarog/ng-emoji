@@ -207,7 +207,7 @@ export class AppComponent &#123;
                 <div class="card-body">
                     <ngx-emoji contenteditable="true"
                                [text]="'Text'"
-                               #emojiHtml
+                               #emojiComponent
                     ></ngx-emoji>
                     <div class="row mt-3">
                         <div class="col-7">
@@ -220,33 +220,43 @@ export class AppComponent &#123;
                         </div>
                         <div class="col-5">
                             <textarea class="form-control" placeholder="Input entities"
-                                      #emojiHtmlEntities
+                                      #emojiComponentEntities
                                       style="font-size: 0.8em"></textarea>
                             <button type="button" class="mt-3 btn btn-primary btn-sm btn-block"
-                            (click)="setEntities(emojiHtml, emojiHtmlEntities.value)">Apply entities</button>
+                            (click)="setEntities(emojiComponent, emojiComponentEntities.value)">Apply entities</button>
                         </div>
                     </div>
                     <hr>
+                    <ngx-emoji
+                            [text]="emojiComponent.text"
+                            [entities]="emojiComponent.entities"
+                    ></ngx-emoji>
+                    <hr>
                     <p class="card-text text-info" style="white-space: pre-wrap;">{{
-                        printFormattingMarks(emojiHtml.text) }}</p>
+                        printFormattingMarks(emojiComponent.text) }}</p>
                     <hr>
                     <p class="card-text text-info">
-                        {{ emojiHtml.entities | json }}
+                        {{ emojiComponent.entities | json }}
                     </p>
                     <hr>
                     <p class="card-text text-info">
-                        {{ emojiHtml.html }}
+                        {{ emojiComponent.html }}
                     </p>
                 </div>
                 <div class="card-footer">
             <pre><code class="text-primary">&lt;ngx-emoji contenteditable="true"
     [text]="'Text'"
-    #emojiHtml
+    #emojiComponent
 &gt;&lt;/ngx-emoji&gt;
 
-<span class="d-none">\</span>&#123;<span class="d-none">\</span>&#123; emojiHtml.text &#125;&#125;
-<span class="d-none">\</span>&#123;<span class="d-none">\</span>&#123; emojiHtml.entities | json &#125;&#125;
-<span class="d-none">\</span>&#123;<span class="d-none">\</span>&#123; emojiHtml.html &#125;&#125;</code></pre>
+&lt;ngx-emoji
+        [text]="emojiComponent.text"
+        [entities]="emojiComponent.entities"
+&gt;&lt;/ngx-emoji&gt;
+
+<span class="d-none">\</span>&#123;<span class="d-none">\</span>&#123; emojiComponent.text &#125;&#125;
+<span class="d-none">\</span>&#123;<span class="d-none">\</span>&#123; emojiComponent.entities | json &#125;&#125;
+<span class="d-none">\</span>&#123;<span class="d-none">\</span>&#123; emojiComponent.html &#125;&#125;</code></pre>
                 </div>
             </div>
         </div>
