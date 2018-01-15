@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { NgxEmojiComponent } from "../main";
+import { isArray } from "util";
 
 @Component({
     selector: 'body',
@@ -10,12 +12,42 @@ export class AppComponent {
     protected window = window;
 
     // View / edit
-    protected editText: string = 'Input text\nLine 2';
+    protected editText: string;
 
     // View and edit
     protected editable: boolean = false;
 
     // Chat
     protected messages: string[] = [];
+
+    /**
+     * String replace all implementation
+     *
+     * See: https://stackoverflow.com/a/1144788/1617101
+     */
+    protected replaceAll(str: string, find: string, replace: string): string {
+        find = find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+        return str.replace(new RegExp(find, 'g'), replace);
+    }
+
+    protected printFormattingMarks(text: string): string {
+        text = this.replaceAll(text, '\n', '↵\n');
+        text = this.replaceAll(text, ' ', '°');
+        return text;
+    }
+
+    protected setEntities(component: NgxEmojiComponent, entities: string): void {
+        let en = [];
+        if (entities.trim().length > 0) {
+            try {
+                let e = eval('(' + entities + ')');
+                if (isArray(e)) {
+                    en = e;
+                }
+            } catch (ex) {
+            }
+        }
+        component.entities = en;
+    }
 
 }

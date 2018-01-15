@@ -1,3 +1,5 @@
-<button type="button" (click)="emojiPicked(':)')">:)</button>
-<button type="button" (click)="emojiPicked(';)')">;)</button>
-<button type="button" (click)="emojiPicked(':D')">:D</button>
+<i *ngFor="let emoji of emojis"
+   [class]="'ngx-emoji ngx-emoji-' + emoji"
+   aria-hidden="true"
+   (click)="emojiPicked(emoji)"
+></i>

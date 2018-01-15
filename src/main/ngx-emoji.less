@@ -3,7 +3,7 @@ ngx-emoji, ngx-emoji-picker {
 }
 
 ngx-emoji {
-  white-space: pre-wrap;
+  min-height: 1em;
 
   &:read-only {
     // pretty text
@@ -12,3 +12,25 @@ ngx-emoji {
     // input text
   }
 }
+
+.ngx-emoji {
+  display: inline-block;
+  /*width: 32px;*/
+  width: calc(~'32px + 1em');
+  height: 32px;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  background-size: 32px 32px;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+ngx-emoji-picker .ngx-emoji {
+  cursor: pointer;
+}
+
+ngx-emoji .ngx-emoji {
+
+}
+
+@import "./../../build-emoji/emoji.css";

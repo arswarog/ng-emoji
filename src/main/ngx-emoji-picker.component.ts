@@ -8,6 +8,13 @@ import { NgxEmojiComponent } from "./ngx-emoji.component";
 })
 export class NgxEmojiPickerComponent {
 
+    protected emojis: string[] = [
+        '0023-FE0F-20E3',
+        '00A9-FE0F',
+        '0039-FE0F-20E3',
+        '1F17F-FE0F'
+    ];
+
     public constructor(
         protected emojiService: NgxEmojiService
     ) {

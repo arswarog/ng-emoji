@@ -15,11 +15,23 @@
             <div class="card">
                 <div class="card-header">View</div>
                 <div class="card-body">
-                    <ngx-emoji [text]="'Pretty text\nLine 2'"></ngx-emoji>
+                    <ngx-emoji
+                            [text]="'Pretty text\nLine 2'"
+                            [entities]="[
+                                {offset: 0, length: 6, type: 'italic'},
+                                {offset: 7, length: 4, type: 'bold'},
+                                {offset: 12, length: 6, type: 'underline'}
+                            ]"
+                    ></ngx-emoji>
                 </div>
                 <div class="card-footer">
                     <pre class="mb-0"><code class="text-primary">&lt;ngx-emoji
     [text]="'Pretty text\nLine 2'"
+    [entities]="[
+        &#123;offset: 0, length: 6, type: 'italic'&#125;,
+        &#123;offset: 7, length: 4, type: 'bold'&#125;,
+        &#123;offset: 12, length: 6, type: 'underline'&#125;
+    ]"
 &gt;&lt;/ngx-emoji&gt;</code></pre>
                 </div>
             </div>
@@ -29,7 +41,7 @@
                 <div class="card-header">Edit</div>
                 <div class="card-body">
                     <ngx-emoji contenteditable="true"
-                               [text]="editText"
+                               [text]="'Input text\nLine 2'"
                                (text)="editText = $event"
                                [enterOn]="{shift: true, ctrl: false}"
                                (enter)="window.alert('You say: &#8220;' + editText + '&#8221;');"
@@ -45,10 +57,10 @@
 })
 export class AppComponent &#123;
   protected window = window;
-  protected editText: string = 'Input text\nLine 2';
-}</code></pre>
+  protected editText: string;
+&#125;</code></pre>
                     <pre class="mb-0"><code class="text-primary">&lt;ngx-emoji contenteditable="true"
-    [text]="editText"
+    [text]="'Input text\nLine 2'"
     (text)="editText = $event"
     [enterOn]="&#123;shift: true, ctrl: false}"
     (enter)="window.alert(editText);"
@@ -58,28 +70,30 @@ export class AppComponent &#123;
         </div>
     </div>
 
-    <div class="card mb-3">
-        <div class="card-header">Dynamic view / edit</div>
-        <div class="card-body pb-0">
-            <ngx-emoji
-                    [attr.contenteditable]="editable"
-                    [text]="'Dynamic text'"
-                    [enterOn]="{ctrl: true}"
-            ></ngx-emoji>
-            <small class="text-muted mb-0 mt-3 d-block">
-                <span *ngIf="!editable">&nbsp;</span>
-                <span *ngIf="editable">Press Enter to insert new line</span>
-            </small>
-        </div>
-        <div class="card-body">
-            <button type="button" class="btn btn-primary"
-                    [class.active]="!editable" (click)="editable=false">View
-            </button>
-            <button type="button" class="btn btn-primary"
-                    [class.active]="editable" (click)="editable=true">Edit
-            </button>
-        </div>
-        <div class="card-footer">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Dynamic view / edit</div>
+                <div class="card-body pb-0">
+                    <ngx-emoji
+                            [attr.contenteditable]="editable"
+                            [text]="'Dynamic text'"
+                            [enterOn]="{ctrl: true}"
+                    ></ngx-emoji>
+                    <small class="text-muted mb-0 mt-3 d-block">
+                        <span *ngIf="!editable">&nbsp;</span>
+                        <span *ngIf="editable">Press Enter to insert new line</span>
+                    </small>
+                </div>
+                <div class="card-body">
+                    <button type="button" class="btn btn-primary"
+                            [class.active]="!editable" (click)="editable=false">View
+                    </button>
+                    <button type="button" class="btn btn-primary"
+                            [class.active]="editable" (click)="editable=true">Edit
+                    </button>
+                </div>
+                <div class="card-footer">
             <pre><code class="text-success">
 &#64;Component(&#123;
   selector: 'body',
@@ -89,13 +103,33 @@ export class AppComponent &#123;
   protected editable: boolean = false;
 }
             </code></pre>
-            <p><code class="text-primary">
-                &lt;ngx-emoji [contenteditable]="editable" [text]="Dynamic text"&gt;&lt;/ngx-emoji&gt;
-            </code></p>
-            OR
-            <p><code class="text-primary">
-                &lt;ngx-emoji [attr.contenteditable]="editable" [text]="Dynamic text"&gt;&lt;/ngx-emoji&gt;
-            </code></p>
+                    <pre><code class="text-primary">&lt;ngx-emoji
+    [contenteditable]="editable"
+    [text]="Dynamic text"
+&gt;&lt;/ngx-emoji&gt;</code></pre>
+                    OR
+                    <pre><code class="text-primary">&lt;ngx-emoji
+    [attr.contenteditable]="editable"
+    [text]="Dynamic text"
+&gt;&lt;/ngx-emoji&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Personal emoji picker</div>
+                <div class="card-body">
+                    <ngx-emoji contenteditable="true" [picker]="personalPicker" [text]="'Text'"></ngx-emoji>
+                    <hr>
+                    <ngx-emoji-picker #personalPicker></ngx-emoji-picker>
+                </div>
+                <div class="card-footer">
+                    <pre><code class="text-primary">&lt;ngx-emoji contenteditable="true"
+[picker]="personalPicker"&gt;&lt;/ngx-emoji&gt;
+
+&lt;ngx-emoji-picker #personalPicker&gt;&lt;/ngx-emoji-picker&gt;</code></pre>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -107,7 +141,7 @@ export class AppComponent &#123;
                     <ngx-emoji class="border border-secondary mb-2" *ngFor="let message of messages;"
                                [text]="message"></ngx-emoji>
                     <ngx-emoji class="border border-primary" contenteditable="true"
-                               (text)="messages.push($event)"
+                               (text)="messages.push($event); chatInput.text = ''"
                                [enterOn]="{ctrl: true}"
                                #chatInput
                     ></ngx-emoji>
@@ -130,7 +164,7 @@ export class AppComponent &#123;
     [text]="message"
 &gt;&lt;/ngx-emoji&gt;
 &lt;ngx-emoji contenteditable="true"
-    (text)="messages.push($event)"
+    (text)="messages.push($event); chatInput.text = ''"
     [enterOn]="&#123;ctrl: true&#125;"
     #chatInput
 &gt;&lt;/ngx-emoji&gt;
@@ -139,7 +173,7 @@ export class AppComponent &#123;
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card mb-3">
+            <div class="card">
                 <div class="card-header">Chat emoji picker</div>
                 <div class="card-body">
                     <ngx-emoji-picker [for]="chatInput"></ngx-emoji-picker>
@@ -150,33 +184,71 @@ export class AppComponent &#123;
                     </code>
                 </div>
             </div>
-
-            <div class="card">
-                <div class="card-header">Personal emoji picker</div>
-                <div class="card-body">
-                    <ngx-emoji contenteditable="true" [picker]="personalPicker" [text]="'Text'"></ngx-emoji>
-                    <hr>
-                    <ngx-emoji-picker #personalPicker></ngx-emoji-picker>
-                </div>
-                <div class="card-footer">
-                    <pre><code class="text-primary">&lt;ngx-emoji contenteditable="true"
-[picker]="personalPicker"&gt;&lt;/ngx-emoji&gt;
-
-&lt;ngx-emoji-picker #personalPicker&gt;&lt;/ngx-emoji-picker&gt;</code></pre>
-                </div>
-            </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">Secondary emoji picker</div>
-        <div class="card-body">
-            <ngx-emoji-picker></ngx-emoji-picker>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Secondary emoji picker</div>
+                <div class="card-body">
+                    <ngx-emoji-picker></ngx-emoji-picker>
+                </div>
+                <div class="card-footer">
+                    <code class="text-primary">
+                        &lt;ngx-emoji-picker&gt;&lt;/ngx-emoji-picker&gt;
+                    </code>
+                </div>
+            </div>
         </div>
-        <div class="card-footer">
-            <code class="text-primary">
-                &lt;ngx-emoji-picker&gt;&lt;/ngx-emoji-picker&gt;
-            </code>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Component viewer</div>
+                <div class="card-body">
+                    <ngx-emoji contenteditable="true"
+                               [text]="'Text'"
+                               #emojiHtml
+                    ></ngx-emoji>
+                    <div class="row mt-3">
+                        <div class="col-7">
+                            <small class="text-muted mb-0">
+                                Press Ctrl+Enter to insert new line;<br>
+                                Press Ctrl+B to make selected text bold;<br>
+                                Press Ctrl+I to make selected text italic;<br>
+                                Press Ctrl+U to make selected text underline.
+                            </small>
+                        </div>
+                        <div class="col-5">
+                            <textarea class="form-control" placeholder="Input entities"
+                                      #emojiHtmlEntities
+                                      style="font-size: 0.8em"></textarea>
+                            <button type="button" class="mt-3 btn btn-primary btn-sm btn-block"
+                            (click)="setEntities(emojiHtml, emojiHtmlEntities.value)">Apply entities</button>
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="card-text text-info" style="white-space: pre-wrap;">{{
+                        printFormattingMarks(emojiHtml.text) }}</p>
+                    <hr>
+                    <p class="card-text text-info">
+                        {{ emojiHtml.entities | json }}
+                    </p>
+                    <hr>
+                    <p class="card-text text-info">
+                        {{ emojiHtml.html }}
+                    </p>
+                </div>
+                <div class="card-footer">
+            <pre><code class="text-primary">&lt;ngx-emoji contenteditable="true"
+    [text]="'Text'"
+    #emojiHtml
+&gt;&lt;/ngx-emoji&gt;
+
+<span class="d-none">\</span>&#123;<span class="d-none">\</span>&#123; emojiHtml.text &#125;&#125;
+<span class="d-none">\</span>&#123;<span class="d-none">\</span>&#123; emojiHtml.entities | json &#125;&#125;
+<span class="d-none">\</span>&#123;<span class="d-none">\</span>&#123; emojiHtml.html &#125;&#125;</code></pre>
+                </div>
+            </div>
         </div>
     </div>
 </main>
