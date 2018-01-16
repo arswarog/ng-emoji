@@ -38,6 +38,7 @@ const EmojiPlugin = class HelloWorldPlugin {
         compiler.plugin('before-run', function (compilation, cb) {
             console.log('Build emoji less to file ' + lessPath);
             const imgDir = path.dirname(lessPath) + '/img';
+            const jsonPath = path.dirname(lessPath) + '/emoji.json';
             if (!fs.existsSync(path.dirname(lessPath))) {
                 fs.mkdirSync(path.dirname(lessPath));
             }
@@ -50,10 +51,11 @@ const EmojiPlugin = class HelloWorldPlugin {
             });
             console.log('Emoji data contains Apple ' + emojis.length + ' emojis');
             const sheetFile = path.resolve(__dirname, './node_modules/emoji-datasource/img/apple/sheets/32.png');
+            let json = [];
 
             let i = 0;
             for (let emoji of emojis) {
-                if (++i > 20) break;
+                if (++i > 100) break;
                 gm(sheetFile)
                     .crop(32, 32, emoji.sheet_x * 32, emoji.sheet_y * 32)
                     .noProfile()
@@ -61,7 +63,9 @@ const EmojiPlugin = class HelloWorldPlugin {
                         if (err) throw err;
                     });
                 fs.appendFileSync(lessPath, '.ngx-emoji-' + emoji.unified + ' {background-image: url("img/' + emoji.unified + '.png");}');
+                json.push({unified: emoji.unified});
             }
+            fs.writeFileSync(jsonPath, JSON.stringify(json));
 
             console.info('Build emoji complete!');
             cb();

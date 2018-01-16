@@ -30,8 +30,12 @@ export class AppComponent {
         return str.replace(new RegExp(find, 'g'), replace);
     }
 
+    protected printBreakLines(text: string): string {
+        return this.replaceAll(text, '\n', '↵\n');
+    }
+
     protected printFormattingMarks(text: string): string {
-        text = this.replaceAll(text, '\n', '↵\n');
+        text = this.printBreakLines(text);
         text = this.replaceAll(text, ' ', '°');
         return text;
     }

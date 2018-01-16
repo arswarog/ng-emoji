@@ -1,23 +1,26 @@
-import { Component, Input } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { NgxEmojiService } from "./ngx-emoji.service";
 import { NgxEmojiComponent } from "./ngx-emoji.component";
+
+export interface NgxEmojiPickerEmoji {
+    unified: string;
+}
 
 @Component({
     selector: 'ngx-emoji-picker',
     templateUrl: './ngx-emoji-picker.component.html'
 })
-export class NgxEmojiPickerComponent {
+export class NgxEmojiPickerComponent implements OnInit {
 
-    protected emojis: string[] = [
-        '0023-FE0F-20E3',
-        '00A9-FE0F',
-        '0039-FE0F-20E3',
-        '1F17F-FE0F'
-    ];
+    protected emojis: NgxEmojiPickerEmoji[] = [];
 
     public constructor(
         protected emojiService: NgxEmojiService
     ) {
+    }
+
+    public ngOnInit(): void {
+        this.emojis = require('../../build-emoji/emoji.json');
     }
 
     public setEmojiService(service: NgxEmojiService): void {

@@ -248,8 +248,9 @@ module.exports = {
         host: 'localhost',
         port: 3000,
         watchOptions: {
-            aggregateTimeout: 300,
-            poll: 1000
+            ignored: [
+                path.resolve(__dirname, '.*')
+            ]
         },
         historyApiFallback: true
     },

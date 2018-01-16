@@ -1,6 +1,5 @@
 import { Component, OnDestroy, ElementRef, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { NgxEmojiService } from "./ngx-emoji.service";
-import { NgxHtmlConverter } from "./ngx-html.converter";
 import { Subscription } from "rxjs/Subscription";
 import { NgxEmojiPickerComponent } from "./ngx-emoji-picker.component";
 import { isString } from "util";
@@ -37,8 +36,12 @@ export class NgxEmojiComponent implements OnDestroy {
         shift: false,
         ctrl: false
     };
+    private prevent: {
+        text: string, entities: NgxEmojiEntity[]
+    } = {
+        text: null, entities: null
+    };
 
-    protected readonly htmlConverter = new NgxHtmlConverter();
     protected emojiService: NgxEmojiService;
     protected emojiServiceSubscription: Subscription = new Subscription();
     protected lastSelectionRange: Range;
@@ -164,76 +167,15 @@ export class NgxEmojiComponent implements OnDestroy {
     }
 
     /**
-     * Text
-     */
-
-    @Input('text')
-    public set text(text: string) {
-        text = this.htmlConverter.filterHtml(text);
-        text = this.replaceAll(text, '  ', '&nbsp;&nbsp;');
-        for(let i = 0; i < text.length; i++) {
-            let code = text.codePointAt(i);
-            //console.log(code);
-        }
-        let paragraphs = text.split('\n');
-        text = '';
-        for (let paragraph of paragraphs) {
-            if (paragraph.trim().length == 0) {
-                paragraph = '<br>';
-            }
-            text += '<div>' + paragraph + '</div>';
-        }
-        this.getNativeElement().innerHTML = text;
-        if (this.getNativeElement().childNodes.length == 0) {
-            this.getNativeElement().appendChild(document.createTextNode(''));
-        }
-        let range = document.createRange();
-        let lastChild = this.getNativeElement().lastChild;
-        while (lastChild.hasChildNodes()) {
-            lastChild = lastChild.lastChild;
-        }
-        range.setStart(lastChild, lastChild.textContent.length);
-        this.lastSelectionRange = range;
-    }
-
-    public get text(): string {
-        let html = document.createElement('div');
-        html.innerHTML = this.getNativeElement().innerHTML;
-
-        for (let img of this.arrayOfNodeList(html.getElementsByTagName('img'))) {
-            if (!img.classList.contains('ngx-emoji')) {
-                continue;
-            }
-            let emoji = '';
-            for (let i = 0; i < img.classList.length; i++) {
-                if (img.classList.item(i).substr(0, 10) == 'ngx-emoji-') {
-                    emoji = img.classList.item(i).substr(10);
-                }
-            }
-            emoji = this.createEmojiUtf(emoji);
-            img.parentElement.insertBefore(document.createTextNode(emoji), img);
-            img.remove();
-        }
-
-        html.innerHTML = this.getHtmlWithoutParagraphs(html).innerHTML;
-        let text = this.htmlConverter.filterHtml(html.innerHTML);
-        text = this.replaceAll(text, '\u00A0', ' ');
-        return text;
-    }
-
-    @Output('text')
-    public readonly onText: EventEmitter<string> = new EventEmitter<string>();
-
-    /**
      * HTML
      */
 
-    @Input('html')
-    public set html(html: string) {
+    @Input('fullHtml')
+    public set fullHtml(html: string) {
         //
     }
 
-    public get html(): string {
+    public get fullHtml(): string {
         let html = document.createElement('div');
         html.innerHTML = this.getNativeElement().innerHTML;
 
@@ -251,8 +193,104 @@ export class NgxEmojiComponent implements OnDestroy {
         return html.innerHTML;
     }
 
+    @Output('fullHtml')
+    public readonly onFullHtml: EventEmitter<string> = new EventEmitter<string>();
+
+    /**
+     * HTML wihout parahraphs
+     */
+
+    @Input('html')
+    public set html(html: string) {
+        //
+    }
+
+    public get html(): string {
+        let component = this;
+        let nativeElement = this.getNativeElement();
+        let html = '';
+        let rf = function (nodes: NodeList): void {
+            for (let node of component.arrayOfNodeList(nodes)) {
+                let blockNode = component.isBlockNode(node);
+                if (component.isEmojiNode(node)) {
+                    html += component.emojiToSymbol(component.emojiFromNode(node));
+                } else if (node.hasChildNodes()) {
+                    if (!blockNode) {
+                        html += '<' + node.nodeName.toLowerCase() + '>';
+                    }
+                    rf(node.childNodes); // recursion...
+                    if (!blockNode) {
+                        html += '</' + node.nodeName.toLowerCase() + '>';
+                    }
+                } else {
+                    html += component.replaceAll(node.textContent, '\n', '');
+                }
+                if (blockNode && !nativeElement.lastChild.isSameNode(node)
+                    || nativeElement.firstChild.isSameNode(node)
+                    && node.nextSibling && component.isBlockNode(node.nextSibling)) {
+                    html += '\n';
+                }
+            }
+        };
+        rf(nativeElement.childNodes);
+        html = this.replaceAll(html, '\u00A0', ' ');
+        html = this.replaceAll(html, '&nbsp;', ' ');
+        return html;
+    }
+
     @Output('html')
     public readonly onHtml: EventEmitter<string> = new EventEmitter<string>();
+
+    /**
+     * Text
+     */
+
+    @Input('text')
+    public set text(text: string) {
+        if (!this.contenteditable && text == this.prevent.text) {
+            return;
+        }
+        this.prevent.text = text;
+
+        let component = this;
+        text = this.filterHtml(text);
+        text = this.replaceAll(text, '\u00A0', ' ');
+        text = this.replaceAll(text, '  ', '&nbsp;&nbsp;');
+        text = text.replace(this.getEmojiRegex(), function (match) {
+            return component.createEmojiImg(component.emojiFromSymbol(match));
+        });
+        text = this.replaceAll(text, '\uFE0F', ''); // remove variation selector
+
+        let paragraphs = text.split('\n');
+        text = '';
+        for (let paragraph of paragraphs) {
+            if (paragraph.length == 0) {
+                paragraph = '<br>';
+            }
+            if (paragraph == ' ') {
+                paragraph = '&nbsp;';
+            }
+            text += '<div>' + paragraph + '</div>';
+        }
+        this.getNativeElement().innerHTML = text;
+        if (this.getNativeElement().childNodes.length == 0) {
+            this.getNativeElement().appendChild(document.createTextNode(''));
+        }
+        let range = document.createRange();
+        let lastChild = this.getNativeElement().lastChild;
+        while (lastChild.hasChildNodes()) {
+            lastChild = lastChild.lastChild;
+        }
+        range.setStart(lastChild, lastChild.textContent.length);
+        this.lastSelectionRange = range;
+    }
+
+    public get text(): string {
+        return this.filterHtml(this.html);
+    }
+
+    @Output('text')
+    public readonly onText: EventEmitter<string> = new EventEmitter<string>();
 
     /**
      * Entities
@@ -270,39 +308,31 @@ export class NgxEmojiComponent implements OnDestroy {
         return null;
     }
 
-    protected isSameEntities(a: NgxEmojiEntity[], b: NgxEmojiEntity[]): boolean {
-        for (let _a of a) {
-            let found = false;
-            for (let _b of b) {
-                if (_a.type == _b.type && _a.length == _b.length && _a.offset == _b.offset) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     @Input('entities')
     public set entities(entities: NgxEmojiEntity[]) {
-        if (this.isSameEntities(entities, this.entities)) {
+        if (!this.contenteditable && JSON.stringify(entities) == JSON.stringify(this.prevent.entities)) {
             return;
         }
+        this.prevent.entities = entities;
+
         let component = this;
+        let nativeElement = this.getNativeElement();
+        let selection = window.getSelection();
+        let previousRange = (selection.rangeCount) ? selection.getRangeAt(0) : null;
+        let previousContenteditableState = this.contenteditable;
         entities = entities.filter(function (entity) {
             entity.type = component.normalizeEntityType(entity.type);
             return (entity.type) ? true : false;
         });
 
-        let html = document.createElement('div');
-        html.contentEditable = 'true';
-        document.getElementsByTagName('body')[0].appendChild(html);
-        this.text = this.text;
-        html.innerHTML = this.getNativeElement().innerHTML;
-        let selection = window.getSelection();
+        // Clear html formatting
+        let text = this.text;
+        this.text = '';
+        this.text = text;
+
+        // Enable contenteditable for exec commands
+        this.contenteditable = true;
+
         let endFounded = false;
         for (let entity of entities) {
             let range = document.createRange();
@@ -310,37 +340,55 @@ export class NgxEmojiComponent implements OnDestroy {
             let rf = function (nodes: NodeList) {
                 for (let i = 0; i < nodes.length; i++) {
                     let node = nodes.item(i);
-                    rf(node.childNodes); // recursion...
-                    if (!node.hasChildNodes()) {
-                        let textLength = node.textContent.length;
+                    if (component.isEmojiNode(node)) {
+                        let textLength = component.emojiToSymbol(component.emojiFromNode(node)).length;
                         if (offset <= entity.offset && offset + textLength >= entity.offset) {
-                            range.setStart(node, entity.offset - offset);
+                            range.setStartBefore(node);
                         }
                         if (offset <= entity.offset + entity.length && offset + textLength >= entity.offset + entity.length) {
-                            range.setEnd(node, entity.offset + entity.length - offset);
+                            range.setEndAfter(node);
                             endFounded = true;
                         }
                         offset += textLength;
-                    }
-                    if (component.isBlockNode(node)) {
-                        offset++;
-                        if (entity.offset + entity.length == offset) {
-                            range.setEndAfter(node.lastChild);
-                            endFounded = true;
+                    } else {
+                        if (node.hasChildNodes()) {
+                            rf(node.childNodes); // recursion
+                        } else if (node.nodeName != 'BR') {
+                            let textLength = node.textContent.length;
+                            if (offset <= entity.offset && offset + textLength >= entity.offset) {
+                                range.setStart(node, entity.offset - offset);
+                            }
+                            if (offset <= entity.offset + entity.length && offset + textLength >= entity.offset + entity.length) {
+                                range.setEnd(node, entity.offset + entity.length - offset);
+                                endFounded = true;
+                            }
+                            offset += textLength;
+                        }
+                        if (component.isBlockNode(node)) {
+                            offset++;
+                            if (entity.offset + entity.length == offset) {
+                                range.setEndAfter(node.lastChild);
+                                endFounded = true;
+                            }
                         }
                     }
                 }
             };
-            rf(html.childNodes);
+            rf(nativeElement.childNodes);
             if (!endFounded) {
-                range.setEndAfter(html.lastChild);
+                range.setEndAfter(nativeElement.lastChild);
             }
             selection.removeAllRanges();
             selection.addRange(range);
             this.formatText(entity.type);
         }
-        html.remove();
-        this.getNativeElement().innerHTML = html.innerHTML;
+
+        // Restore previous state
+        selection.removeAllRanges();
+        if (previousRange) {
+            selection.addRange(previousRange);
+        }
+        this.contenteditable = previousContenteditableState;
     }
 
     public get entities(): NgxEmojiEntity[] {
@@ -376,7 +424,10 @@ export class NgxEmojiComponent implements OnDestroy {
                 offset += node.textContent.length;
             }
         };
-        rf(this.getHtmlWithoutParagraphs(this.getNativeElement()).childNodes, 0);
+        let div = document.createElement('div');
+        div.innerHTML = this.html;
+        rf(div.childNodes, 0);
+        div.remove();
         return entities;
     }
 
@@ -430,6 +481,7 @@ export class NgxEmojiComponent implements OnDestroy {
     protected emitEnter(): void {
         this.onText.emit(this.text);
         this.onEntities.emit(this.entities);
+        this.onFullHtml.emit(this.fullHtml);
         this.onHtml.emit(this.html);
         this.onEnter.emit();
     }
@@ -495,40 +547,35 @@ export class NgxEmojiComponent implements OnDestroy {
     }
 
     protected isBlockNode(node: Node): boolean {
-        return node instanceof HTMLElement
-            && window.getComputedStyle(node, '').display == 'block';
+        if (!(node instanceof HTMLElement)) {
+            return false;
+        }
+        if (node instanceof HTMLDivElement) {
+            return true;
+        }
+        return window.getComputedStyle(node, '').display == 'block';
     }
 
-    protected getHtmlWithoutParagraphs(element: HTMLElement): HTMLElement {
-        let html = '';
-        let component = this;
-        let rf = function (nodes: NodeList): void {
-            for (let node of component.arrayOfNodeList(nodes)) {
-                if (node.hasChildNodes()) {
-                    html += '<' + node.nodeName + '>';
-                    rf(node.childNodes); // recursion...
-                    html += '</' + node.nodeName + '>';
-                    if (component.isBlockNode(node) && !element.lastChild.isSameNode(node)) {
-                        html += '\n';
-                    }
-                } else {
-                    if (node.nodeName == 'BR') {
-                        if (node.parentNode.isSameNode(element)
-                            || !component.isBlockNode(node.parentNode)
-                            || !node.parentNode.lastChild.isSameNode(node)) {
-                            html += '\n';
-                        }
-                    } else {
-                        html += node.textContent;
-                    }
-                }
-            }
-        };
-        rf(element.childNodes);
+    protected isEmojiNode(node: Node): boolean {
+        if (!(node instanceof HTMLElement)) {
+            return false;
+        }
+        return node.classList.contains('ngx-emoji');
+    }
 
-        let result = document.createElement('div');
-        result.innerHTML = html;
-        return result;
+    protected emojiFromNode(node: Node): string {
+        if (!this.isEmojiNode(node)) {
+            return null;
+        }
+        let classList = (node as HTMLElement).classList;
+        let emoji = null;
+        for (let i = 0; i < classList.length; i++) {
+            if (classList.item(i).substr(0, 10) == 'ngx-emoji-') {
+                emoji = classList.item(i).substr(10);
+                break;
+            }
+        }
+        return emoji;
     }
 
     /**
@@ -552,11 +599,11 @@ export class NgxEmojiComponent implements OnDestroy {
     protected createEmojiImg(emoji: string): string {
         return '<img class="ngx-emoji ngx-emoji-' + emoji + '" ' +
             'aria-hidden="true" ' +
-            'alt="' + this.createEmojiUtf(emoji) + '" ' +
+            'alt="' + this.emojiToSymbol(emoji) + '" ' +
             'src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">';
     }
 
-    protected createEmojiUtf(emoji: string): string {
+    protected emojiToSymbol(emoji: string): string {
         emoji = emoji.trim();
         if (emoji.length == 0) {
             return '�';
@@ -573,6 +620,26 @@ export class NgxEmojiComponent implements OnDestroy {
         return emoji;
     }
 
+    protected emojiFromSymbol(symbol: string): string {
+        let codes: string[] = [];
+        for (let i = 0; i < symbol.length; i++) {
+            codes.push(symbol.codePointAt(i).toString(16));
+        }
+        codes = codes
+            .filter(function (code: string) {
+                let p = parseInt(code, 16);
+                return !(p >= 0xD800 && p <= 0xDFFF);
+            })
+            .map(function (code: string) {
+                let pad = '0000';
+                return pad.substring(0, pad.length - code.length) + code;
+            });
+        if (codes.length == 1) {
+            codes.push('FE0F');
+        }
+        return codes.join('-').toUpperCase();
+    }
+
     protected insertEmoji(emoji: string): void {
         if (!this.contenteditable) {
             return;
@@ -584,6 +651,13 @@ export class NgxEmojiComponent implements OnDestroy {
             'insertHTML',
             this.createEmojiImg(emoji)
         );
+    }
+
+    protected filterHtml(text: string): string {
+        let tmp = document.createElement("div");
+        tmp.innerHTML = text;
+        text = tmp.textContent || tmp.innerText || "";
+        return text;
     }
 
     protected formatText(type: NgxEmojiEntityType): void {
@@ -598,6 +672,13 @@ export class NgxEmojiComponent implements OnDestroy {
                 this.execCommand('underline');
                 break;
         }
+    }
+
+    /**
+     * See: https://stackoverflow.com/a/41164587/1617101
+     */
+    protected getEmojiRegex(): RegExp {
+        return /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c[\ude01\uddff]|\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c[\ude32\ude02]|\ud83c\ude1a|\ud83c\ude2f|\ud83c[\ude32-\ude3a]|[\ud83c[\ude50\ude3a]|\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/g;
     }
 
 }

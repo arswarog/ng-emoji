@@ -1,5 +1,5 @@
 <i *ngFor="let emoji of emojis"
-   [class]="'ngx-emoji ngx-emoji-' + emoji"
+   [class]="'ngx-emoji ngx-emoji-' + emoji.unified"
    aria-hidden="true"
-   (click)="emojiPicked(emoji)"
+   (click)="emojiPicked(emoji.unified)"
 ></i>
