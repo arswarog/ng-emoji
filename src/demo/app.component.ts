@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NgxEmojiComponent } from "../main";
+import { NgxEmojiComponent, NgxEmojiEntity } from "../main";
 import { isArray } from "util";
 
 @Component({
@@ -18,7 +18,10 @@ export class AppComponent {
     protected editable: boolean = false;
 
     // Chat
-    protected messages: string[] = [];
+    protected messages: {
+        text: string,
+        emtities: NgxEmojiEntity
+    }[] = [];
 
     /**
      * String replace all implementation

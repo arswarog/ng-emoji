@@ -2,7 +2,7 @@ import { Component, OnDestroy, ElementRef, Input, Output, EventEmitter, HostList
 import { NgxEmojiService } from "./ngx-emoji.service";
 import { Subscription } from "rxjs/Subscription";
 import { NgxEmojiPickerComponent } from "./ngx-emoji-picker.component";
-import { isString } from "util";
+import { isArray, isString } from "util";
 
 export interface EnterOn {
     shift?: boolean;
@@ -45,6 +45,7 @@ export class NgxEmojiComponent implements OnDestroy {
     protected emojiService: NgxEmojiService;
     protected emojiServiceSubscription: Subscription = new Subscription();
     protected lastSelectionRange: Range;
+    protected readonly allowedTags = ['b', 'i', 'u', 'strong', 'em'];
 
     public constructor(
         protected elRef: ElementRef,
@@ -172,7 +173,7 @@ export class NgxEmojiComponent implements OnDestroy {
 
     @Input('fullHtml')
     public set fullHtml(html: string) {
-        //
+        this.getNativeElement().innerHTML = this.filterHtml(html, this.allowedTags)
     }
 
     public get fullHtml(): string {
@@ -202,7 +203,7 @@ export class NgxEmojiComponent implements OnDestroy {
 
     @Input('html')
     public set html(html: string) {
-        //
+        this.getNativeElement().innerHTML = this.filterHtml(html, this.allowedTags)
     }
 
     public get html(): string {
@@ -225,9 +226,29 @@ export class NgxEmojiComponent implements OnDestroy {
                 } else {
                     html += component.replaceAll(node.textContent, '\n', '');
                 }
-                if (blockNode && !nativeElement.lastChild.isSameNode(node)
-                    || nativeElement.firstChild.isSameNode(node)
-                    && node.nextSibling && component.isBlockNode(node.nextSibling)) {
+                if (blockNode && !nativeElement.lastChild.isSameNode(node)) {
+                    html += '\n';
+                }
+                if (node.nodeName == 'BR'
+                    && node.parentNode.firstChild.nodeName != 'BR'
+                    && node.parentNode.childNodes.length != 1
+                    && !nativeElement.lastChild.lastChild.isSameNode(node)) {
+                    html += '\n';
+                }
+                // hotfix: insert new line after non-block node
+                if (!blockNode
+                    && node.previousSibling
+                    && node.previousSibling.textContent.length > 0
+                    && node.nextSibling
+                    && component.isBlockNode(node.nextSibling)
+                    && node.parentNode.isSameNode(nativeElement)) {
+                    html += '\n';
+                }
+                // hotfix: insert new line after last emoji
+                if (component.isEmojiNode(node)
+                    && (node as HTMLElement).nextElementSibling
+                    && component.isBlockNode((node as HTMLElement).nextElementSibling)
+                    && node.nextSibling.textContent.length == 0) {
                     html += '\n';
                 }
             }
@@ -320,6 +341,9 @@ export class NgxEmojiComponent implements OnDestroy {
         let selection = window.getSelection();
         let previousRange = (selection.rangeCount) ? selection.getRangeAt(0) : null;
         let previousContenteditableState = this.contenteditable;
+        if (!isArray(entities)) {
+            entities = [];
+        }
         entities = entities.filter(function (entity) {
             entity.type = component.normalizeEntityType(entity.type);
             return (entity.type) ? true : false;
@@ -535,6 +559,18 @@ export class NgxEmojiComponent implements OnDestroy {
     }
 
     /**
+     * Clipboard events
+     */
+
+    @HostListener("paste", ['$event'])
+    protected onPaste(event: ClipboardEvent): void {
+        event.preventDefault();
+        let html = event.clipboardData.getData('text/html');
+        html = this.filterHtml(html, this.allowedTags);
+        this.execCommand('insertHTML', html);
+    }
+
+    /**
      * Internal
      */
 
@@ -634,9 +670,6 @@ export class NgxEmojiComponent implements OnDestroy {
                 let pad = '0000';
                 return pad.substring(0, pad.length - code.length) + code;
             });
-        if (codes.length == 1) {
-            codes.push('FE0F');
-        }
         return codes.join('-').toUpperCase();
     }
 
@@ -653,11 +686,32 @@ export class NgxEmojiComponent implements OnDestroy {
         );
     }
 
-    protected filterHtml(text: string): string {
+    protected filterHtml(html: string, allowTags: string[] = []): string {
+        let component = this;
+        allowTags = allowTags.map(function (value) {
+            return value.toUpperCase();
+        });
         let tmp = document.createElement("div");
-        tmp.innerHTML = text;
-        text = tmp.textContent || tmp.innerText || "";
-        return text;
+        tmp.innerHTML = html;
+        html = '';
+        let rf = function (nodes: NodeList): void {
+            for (let node of component.arrayOfNodeList(nodes)) {
+                if (node.nodeType == node.ELEMENT_NODE) {
+                    if (allowTags.indexOf(node.nodeName) > -1) {
+                        html += '<' + node.nodeName.toLowerCase() + '>';
+                        rf(node.childNodes);
+                        html += '</' + node.nodeName.toLowerCase() + '>';
+                    } else {
+                        rf(node.childNodes);
+                    }
+                } else {
+                    html += node.textContent;
+                }
+            }
+        };
+        rf(tmp.childNodes);
+        tmp.remove();
+        return html;
     }
 
     protected formatText(type: NgxEmojiEntityType): void {

@@ -15,22 +15,17 @@ ngx-emoji {
 
 .ngx-emoji {
   display: inline-block;
-  /*width: 32px;*/
-  width: calc(~'32px + 1em');
-  height: 32px;
-  padding-left: 0.5em;
-  padding-right: 0.5em;
-  background-size: 32px 32px;
+  width: 0px;
+  height: 1em;
+  background-size: 1em 1em;
   background-repeat: no-repeat;
   background-position: center center;
+  padding-left: 0.6em;
+  padding-right: 0.6em;
 }
 
 ngx-emoji-picker .ngx-emoji {
   cursor: pointer;
-}
-
-ngx-emoji .ngx-emoji {
-
 }
 
 @import "./../../build-emoji/emoji.css";
