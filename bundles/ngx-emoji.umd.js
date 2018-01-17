@@ -1,10 +1,14 @@
 (function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(factory());
+}(this, (function () { 'use strict';
+
+(function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core'), require('@angular/common'), require('rxjs/Subject'), require('rxjs/Subscription'), require('util'), require('ngx-emoji/ngx-emoji.min.css'), require('ngx-emoji/emojis.min.css')) :
 	typeof define === 'function' && define.amd ? define(['exports', '@angular/core', '@angular/common', 'rxjs/Subject', 'rxjs/Subscription', 'util', 'ngx-emoji/ngx-emoji.min.css', 'ngx-emoji/emojis.min.css'], factory) :
 	(factory((global['ngx-emoji'] = {}),global.ng.core,global.ng.common,global.Rx,global.Rx,global.util));
-}(this, (function (exports,core,common,Subject,Subscription,util) { 'use strict';
-
-var __values = (this && this.__values) || function (o) {
+}(undefined, (function (exports,core,common,Subject,Subscription,util) { var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
     if (m) return m.call(o);
     return {
@@ -1122,4 +1126,5 @@ exports.NgxEmojiService = NgxEmojiService;
 Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
-//# sourceMappingURL=ngx-emoji.umd.js.map
+
+})));
