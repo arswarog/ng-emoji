@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Subject as Subject$1 } from 'rxjs/Subject';
 import { Subscription as Subscription$1 } from 'rxjs/Subscription';
 import { isArray, isString } from 'util';
-import 'ngx-emoji.min.css';
-import 'emojis.min.css';
+import 'ngx-emoji/ngx-emoji.min.css';
+import 'ngx-emoji/emojis.min.css';
 
 /**
  * @fileoverview added by tsickle
@@ -920,7 +920,7 @@ class NgxEmojiPickerComponent {
      * @return {?}
      */
     ngOnInit() {
-        this.emojis = require('emojis.json');
+        this.emojis = require('ngx-emoji/emojis.json');
     }
     /**
      * @param {?} service
