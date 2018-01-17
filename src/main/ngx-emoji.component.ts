@@ -2,7 +2,6 @@ import { Component, OnDestroy, ElementRef, Input, Output, EventEmitter, HostList
 import { NgxEmojiService } from "./ngx-emoji.service";
 import { Subscription } from "rxjs/Subscription";
 import { NgxEmojiPickerComponent } from "./ngx-emoji-picker.component";
-import { isArray, isString } from "util";
 
 export interface EnterOn {
     shift?: boolean;
@@ -15,13 +14,13 @@ export interface SelectionRange {
 }
 
 export enum NgxEmojiEntityType {
-    Bold = 'bold',
-    Italic = 'italic',
-    Underline = 'underline'
+    Bold,
+    Italic,
+    Underline
 }
 
 export interface NgxEmojiEntity {
-    type: NgxEmojiEntityType;
+    type: NgxEmojiEntityType | string;
     offset: number;
     length: number;
 }
@@ -319,15 +318,22 @@ export class NgxEmojiComponent implements OnDestroy {
      */
 
     protected normalizeEntityType(type: any): NgxEmojiEntityType {
-        if (!type || !isString(type) || type.trim().length == 0) {
-            return null;
+        if (typeof type == 'string') {
+            type = type.toLowerCase();
         }
-        for (let value in NgxEmojiEntityType) {
-            if ((value as string).toUpperCase() == (type as string).toUpperCase()) {
-                return NgxEmojiEntityType[value] as NgxEmojiEntityType;
-            }
+        switch (type) {
+            case 'bold':
+            case NgxEmojiEntityType.Bold:
+                return NgxEmojiEntityType.Bold;
+            case 'italic':
+            case NgxEmojiEntityType.Italic:
+                return NgxEmojiEntityType.Italic;
+            case 'underline':
+            case NgxEmojiEntityType.Underline:
+                return NgxEmojiEntityType.Underline;
+            default:
+                return null;
         }
-        return null;
     }
 
     @Input('entities')
@@ -342,12 +348,17 @@ export class NgxEmojiComponent implements OnDestroy {
         let selection = window.getSelection();
         let previousRange = (selection.rangeCount) ? selection.getRangeAt(0) : null;
         let previousContenteditableState = this.contenteditable;
-        if (!isArray(entities)) {
+        if (!Array.isArray(entities)) {
             entities = [];
         }
-        entities = entities.filter(function (entity) {
-            entity.type = component.normalizeEntityType(entity.type);
-            return (entity.type) ? true : false;
+        entities = entities.map(function (entity) {
+            return {
+                offset: entity.offset,
+                length: entity.length,
+                type: component.normalizeEntityType(entity.type)
+            };
+        }).filter(function (entity) {
+            return entity.type !== null;
         });
 
         // Clear html formatting
@@ -405,7 +416,7 @@ export class NgxEmojiComponent implements OnDestroy {
             }
             selection.removeAllRanges();
             selection.addRange(range);
-            this.formatText(entity.type);
+            this.formatText(entity.type as NgxEmojiEntityType);
         }
 
         // Restore previous state
@@ -425,21 +436,21 @@ export class NgxEmojiComponent implements OnDestroy {
                     let nodeName = node.nodeName.toUpperCase();
                     if (nodeName == 'B' || nodeName == 'STRONG') {
                         entities.push({
-                            type: NgxEmojiEntityType.Bold,
+                            type: NgxEmojiEntityType[NgxEmojiEntityType.Bold].toLowerCase(),
                             offset: offset,
                             length: node.textContent.length
                         });
                     }
                     if (nodeName == 'I' || nodeName == 'EM') {
                         entities.push({
-                            type: NgxEmojiEntityType.Italic,
+                            type: NgxEmojiEntityType[NgxEmojiEntityType.Italic].toLowerCase(),
                             offset: offset,
                             length: node.textContent.length
                         });
                     }
                     if (nodeName == 'U') {
                         entities.push({
-                            type: NgxEmojiEntityType.Underline,
+                            type: NgxEmojiEntityType[NgxEmojiEntityType.Underline].toLowerCase(),
                             offset: offset,
                             length: node.textContent.length
                         });

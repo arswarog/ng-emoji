@@ -174,6 +174,28 @@ module.exports = {
             },
 
             /**
+             * Replace paths
+             *
+             * see: https://github.com/Va1/string-replace-loader
+             */
+            {
+                test: [path.resolve(__dirname, 'src/main/ngx-emoji.module.ts')],
+                loader: 'string-replace-loader',
+                query: {
+                    search: 'ngx-emoji/ngx-emoji.min.css',
+                    replace: 'main/ngx-emoji.less'
+                }
+            },
+            {
+                test: [path.resolve(__dirname, 'src/main/ngx-emoji-picker.component.ts')],
+                loader: 'string-replace-loader',
+                query: {
+                    search: 'ngx-emoji/emojis.json',
+                    replace: '../../build-emoji/emojis.json'
+                }
+            },
+
+            /**
              * Less loader
              *
              * See: https://github.com/webpack-contrib/less-loader#examples
@@ -210,7 +232,7 @@ module.exports = {
             // The (\\|\/) piece accounts for path separators in *nix and Windows
             // For Angular 5, see also https://github.com/angular/angular/issues/20357#issuecomment-343683491
             /\@angular(\\|\/)core(\\|\/)esm5/,
-            path.resolve(__dirname, '.'), // location of your src
+            path.resolve(__dirname, 'src/demo'), // location of your src
             {}
         ),
 

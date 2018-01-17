@@ -20,7 +20,7 @@ export class NgxEmojiPickerComponent implements OnInit {
     }
 
     public ngOnInit(): void {
-        this.emojis = require('../../build-emoji/emoji.json');
+        this.emojis = require('ngx-emoji/emojis.json');
     }
 
     public setEmojiService(service: NgxEmojiService): void {

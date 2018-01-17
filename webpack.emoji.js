@@ -38,7 +38,7 @@ const EmojiPlugin = class HelloWorldPlugin {
         compiler.plugin('before-run', function (compilation, cb) {
             console.log('Build emoji less to file ' + lessPath);
             const imgDir = path.dirname(lessPath) + '/img';
-            const jsonPath = path.dirname(lessPath) + '/emoji.json';
+            const jsonPath = path.dirname(lessPath) + '/emojis.json';
             if (!fs.existsSync(path.dirname(lessPath))) {
                 fs.mkdirSync(path.dirname(lessPath));
             }
@@ -93,7 +93,8 @@ module.exports = {
      * See: http://webpack.github.io/docs/configuration.html#entry
      */
     entry: {
-        'emoji': buildDir + '/emoji.less'
+        'ngx-emoji.min': path.resolve(__dirname, 'src/main/ngx-emoji.less'),
+        'emojis.min': buildDir + '/emoji.less'
     },
 
     /**
@@ -107,10 +108,7 @@ module.exports = {
          *
          * See: http://webpack.github.io/docs/configuration.html#resolve-extensions
          */
-        extensions: ['.less'],
-
-        // An array of directory names to be resolved to the current directory
-        modules: [buildDir]
+        extensions: ['.less']
     },
 
     /**
@@ -162,7 +160,6 @@ module.exports = {
              */
             {
                 test: /\.less$/,
-                include: buildDir,
                 use: extractLess.extract({
                     use: [{
                         loader: "css-loader", // translates CSS into CommonJS
