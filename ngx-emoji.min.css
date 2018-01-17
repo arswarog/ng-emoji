@@ -1,2 +1,2 @@
-ngx-emoji,ngx-emoji-picker{display:block}ngx-emoji{min-height:1em}.ngx-emoji{display:inline-block;width:0;height:1em;background-size:1em 1em;background-repeat:no-repeat;background-position:50%;padding-left:.6em;padding-right:.6em}ngx-emoji-picker .ngx-emoji{cursor:pointer}
+ngx-emoji,ngx-emoji-picker{display:block}ngx-emoji{min-height:1em}.ngx-emoji{display:inline-block;width:0;height:1em;background-size:1em 1em;background-repeat:no-repeat;background-position:50%;padding-left:.6em;padding-right:.6em;position:relative;bottom:.1em}ngx-emoji-picker .ngx-emoji{cursor:pointer}
 /*# sourceMappingURL=ngx-emoji.min.css.map*/

@@ -103,6 +103,10 @@ export declare class NgxEmojiComponent implements OnDestroy {
     protected onCopy(event: ClipboardEvent): void;
     protected onCut(event: ClipboardEvent): void;
     /**
+     * Click events
+     */
+    protected onClick(event: MouseEvent): void;
+    /**
      * Internal
      */
     protected arrayOfNodeList<T extends Node>(list: NodeListOf<T>): T[];

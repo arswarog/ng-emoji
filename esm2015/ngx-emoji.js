@@ -306,7 +306,7 @@ class NgxEmojiComponent {
         rf(rootElement.childNodes);
         html = this.replaceAll(html, '\u00A0', ' ');
         html = this.replaceAll(html, '&nbsp;', ' ');
-        return html;
+        return this.filterHtml(html, this.allowedTags);
     }
     /**
      * Text
@@ -661,6 +661,23 @@ class NgxEmojiComponent {
         this.execCommand('delete');
     }
     /**
+     * Click events
+     * @param {?} event
+     * @return {?}
+     */
+    onClick(event) {
+        if (!this.contenteditable) {
+            return;
+        }
+        if (this.isEmojiNode(event.toElement)) {
+            let /** @type {?} */ range = document.createRange();
+            range.setStartBefore(event.toElement);
+            let /** @type {?} */ selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+    /**
      * Internal
      * @template T
      * @param {?} list
@@ -912,6 +929,7 @@ NgxEmojiComponent.propDecorators = {
     "onPaste": [{ type: HostListener, args: ["paste", ['$event'],] },],
     "onCopy": [{ type: HostListener, args: ["copy", ['$event'],] },],
     "onCut": [{ type: HostListener, args: ["cut", ['$event'],] },],
+    "onClick": [{ type: HostListener, args: ["click", ['$event'],] },],
 };
 
 /**

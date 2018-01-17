@@ -358,7 +358,7 @@ var NgxEmojiComponent = /** @class */ (function () {
         rf(rootElement.childNodes);
         html = this.replaceAll(html, '\u00A0', ' ');
         html = this.replaceAll(html, '&nbsp;', ' ');
-        return html;
+        return this.filterHtml(html, this.allowedTags);
     };
     Object.defineProperty(NgxEmojiComponent.prototype, "text", {
         /**
@@ -758,6 +758,23 @@ var NgxEmojiComponent = /** @class */ (function () {
         this.execCommand('delete');
     };
     /**
+     * Click events
+     * @param {?} event
+     * @return {?}
+     */
+    NgxEmojiComponent.prototype.onClick = function (event) {
+        if (!this.contenteditable) {
+            return;
+        }
+        if (this.isEmojiNode(event.toElement)) {
+            var /** @type {?} */ range = document.createRange();
+            range.setStartBefore(event.toElement);
+            var /** @type {?} */ selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    };
+    /**
      * Internal
      * @template T
      * @param {?} list
@@ -1022,6 +1039,7 @@ NgxEmojiComponent.propDecorators = {
     "onPaste": [{ type: HostListener, args: ["paste", ['$event'],] },],
     "onCopy": [{ type: HostListener, args: ["copy", ['$event'],] },],
     "onCut": [{ type: HostListener, args: ["cut", ['$event'],] },],
+    "onClick": [{ type: HostListener, args: ["click", ['$event'],] },],
 };
 /**
  * @fileoverview added by tsickle

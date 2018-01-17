@@ -1,6 +1,6 @@
 {
   "name": "ngx-emoji",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "description": "Components with Emoji for Angular 4+",
   "repository": {
     "type": "git",
@@ -44,7 +44,7 @@
     "build:package": "ng-packagr -p package.json",
     "postbuild:package": "cp-cli build-emoji/ngx-emoji.min.css dist/ngx-emoji.min.css && cp-cli build-emoji/emojis.min.css dist/emojis.min.css && cp-cli build-emoji/emojis.json dist/emojis.json",
     "build:demo": "webpack --config webpack.demo.js --progress --profile --bail",
-    "build:emoji": "webpack --config webpack.emoji.js --progress --profile --bail",
+    "build:emoji": "node --stack-size=65500 node_modules/.bin/webpack --config webpack.emoji.js --progress --profile --bail",
     "build": "npm run build:emoji && npm run build:package && npm run build:demo",
     "start:demo": "webpack-dev-server --config webpack.demo.js --progress --profile",
     "start": "npm run start:demo"
@@ -69,7 +69,7 @@
     "core-js": "2.5.3",
     "cp-cli": "1.1.0",
     "css-loader": "0.28.8",
-    "emoji-datasource": "3.0.0",
+    "emoji-datasource": "4.0.3",
     "extract-text-webpack-plugin": "3.0.2",
     "file-loader": "1.1.6",
     "gm": "1.23.1",
