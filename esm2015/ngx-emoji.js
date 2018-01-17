@@ -2,7 +2,6 @@ import { Component, ElementRef, EventEmitter, HostListener, Injectable, Input, N
 import { CommonModule } from '@angular/common';
 import { Subject as Subject$1 } from 'rxjs/Subject';
 import { Subscription as Subscription$1 } from 'rxjs/Subscription';
-import { isArray, isString } from 'util';
 import 'ngx-emoji/ngx-emoji.min.css';
 import 'ngx-emoji/emojis.min.css';
 
@@ -358,7 +357,7 @@ class NgxEmojiComponent {
      * @return {?}
      */
     normalizeEntityType(type) {
-        if (isString(type)) {
+        if (typeof type == 'string') {
             type = type.toLowerCase();
         }
         switch (type) {
@@ -389,7 +388,7 @@ class NgxEmojiComponent {
         let /** @type {?} */ selection = window.getSelection();
         let /** @type {?} */ previousRange = (selection.rangeCount) ? selection.getRangeAt(0) : null;
         let /** @type {?} */ previousContenteditableState = this.contenteditable;
-        if (!isArray(entities)) {
+        if (!Array.isArray(entities)) {
             entities = [];
         }
         entities = entities.map(function (entity) {
