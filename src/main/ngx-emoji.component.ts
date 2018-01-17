@@ -259,7 +259,7 @@ export class NgxEmojiComponent implements OnDestroy {
         rf(rootElement.childNodes);
         html = this.replaceAll(html, '\u00A0', ' ');
         html = this.replaceAll(html, '&nbsp;', ' ');
-        return html;
+        return this.filterHtml(html, this.allowedTags);
     }
 
     @Output('html')
@@ -617,6 +617,24 @@ export class NgxEmojiComponent implements OnDestroy {
     protected onCut(event: ClipboardEvent): void {
         this.onCopy(event);
         this.execCommand('delete');
+    }
+
+    /**
+     * Click events
+     */
+
+    @HostListener("click", ['$event'])
+    protected onClick(event: MouseEvent): void {
+        if (!this.contenteditable) {
+            return;
+        }
+        if (this.isEmojiNode(event.toElement)) {
+            let range = document.createRange();
+            range.setStartBefore(event.toElement);
+            let selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
     }
 
     /**

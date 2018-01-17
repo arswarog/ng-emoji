@@ -57,13 +57,14 @@ const EmojiPlugin = class HelloWorldPlugin {
             for (let emoji of emojis) {
                 if (++i > 100) break;
                 gm(sheetFile)
-                    .crop(32, 32, emoji.sheet_x * 32, emoji.sheet_y * 32)
+                    .crop(32, 32, emoji.sheet_x * 34 + 1, emoji.sheet_y * 34 + 1)
                     .noProfile()
                     .write(imgDir + '/' + emoji.unified + '.png', function (err) {
                         if (err) throw err;
                     });
-                fs.appendFileSync(lessPath, '.ngx-emoji-' + emoji.unified + ' {background-image: url("img/' + emoji.unified + '.png");}');
-                json.push({unified: emoji.unified});
+                let codepoint = (emoji.non_qualified) ? emoji.non_qualified : emoji.unified;
+                fs.appendFileSync(lessPath, '.ngx-emoji-' + codepoint + ' {background-image: url("img/' + emoji.unified + '.png");}');
+                json.push({unified: codepoint});
             }
             fs.writeFileSync(jsonPath, JSON.stringify(json));
 
