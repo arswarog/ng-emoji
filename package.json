@@ -22,7 +22,12 @@
   "files": [
     "ngx-emoji.min.css",
     "emojis.min.css",
-    "emojis.json"
+    "emojis.json",
+    "bundles/*",
+    "esm2015/*",
+    "esm5",
+    "*.d.ts",
+    "*.metadata.json"
   ],
   "scripts": {
     "rimraf": "rimraf",
