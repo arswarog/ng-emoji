@@ -207,8 +207,11 @@ export class NgxEmojiComponent implements OnDestroy {
     }
 
     public get html(): string {
+        return this.getHtml(this.getNativeElement());
+    }
+
+    protected getHtml(rootElement: HTMLElement): string {
         let component = this;
-        let nativeElement = this.getNativeElement();
         let html = '';
         let rf = function (nodes: NodeList): void {
             for (let node of component.arrayOfNodeList(nodes)) {
@@ -226,13 +229,14 @@ export class NgxEmojiComponent implements OnDestroy {
                 } else {
                     html += component.replaceAll(node.textContent, '\n', '');
                 }
-                if (blockNode && !nativeElement.lastChild.isSameNode(node)) {
+                if (blockNode && !rootElement.lastChild.isSameNode(node)) {
                     html += '\n';
                 }
                 if (node.nodeName == 'BR'
                     && node.parentNode.firstChild.nodeName != 'BR'
                     && node.parentNode.childNodes.length != 1
-                    && !nativeElement.lastChild.lastChild.isSameNode(node)) {
+                    && rootElement.lastChild.lastChild
+                    && !rootElement.lastChild.lastChild.isSameNode(node)) {
                     html += '\n';
                 }
                 // hotfix: insert new line after non-block node
@@ -241,7 +245,7 @@ export class NgxEmojiComponent implements OnDestroy {
                     && node.previousSibling.textContent.length > 0
                     && node.nextSibling
                     && component.isBlockNode(node.nextSibling)
-                    && node.parentNode.isSameNode(nativeElement)) {
+                    && node.parentNode.isSameNode(rootElement)) {
                     html += '\n';
                 }
                 // hotfix: insert new line after last emoji
@@ -253,7 +257,7 @@ export class NgxEmojiComponent implements OnDestroy {
                 }
             }
         };
-        rf(nativeElement.childNodes);
+        rf(rootElement.childNodes);
         html = this.replaceAll(html, '\u00A0', ' ');
         html = this.replaceAll(html, '&nbsp;', ' ');
         return html;
@@ -277,10 +281,7 @@ export class NgxEmojiComponent implements OnDestroy {
         text = this.filterHtml(text);
         text = this.replaceAll(text, '\u00A0', ' ');
         text = this.replaceAll(text, '  ', '&nbsp;&nbsp;');
-        text = text.replace(this.getEmojiRegex(), function (match) {
-            return component.createEmojiImg(component.emojiFromSymbol(match));
-        });
-        text = this.replaceAll(text, '\uFE0F', ''); // remove variation selector
+        text = this.replaceSymbolsToEmojis(text);
 
         let paragraphs = text.split('\n');
         text = '';
@@ -565,9 +566,46 @@ export class NgxEmojiComponent implements OnDestroy {
     @HostListener("paste", ['$event'])
     protected onPaste(event: ClipboardEvent): void {
         event.preventDefault();
-        let html = event.clipboardData.getData('text/html');
+        let html = '';
+        if (event.clipboardData.types.indexOf('text/html') > -1) {
+            html = event.clipboardData.getData('text/html');
+        } else if (event.clipboardData.types.indexOf('text/plain') > -1) {
+            html = event.clipboardData.getData('text/plain');
+        }
         html = this.filterHtml(html, this.allowedTags);
+        html = this.replaceSymbolsToEmojis(html);
         this.execCommand('insertHTML', html);
+    }
+
+    @HostListener("copy", ['$event'])
+    protected onCopy(event: ClipboardEvent): void {
+        let previousRange = window.getSelection().getRangeAt(0);
+        if (previousRange.collapsed) {
+            return;
+        }
+        event.preventDefault();
+        let content: DocumentFragment = window.getSelection().getRangeAt(0).cloneContents();
+        let div = document.createElement('div');
+        div.appendChild(content);
+        div.innerHTML = this.getHtml(div);
+        // Copy HTML hack
+        document.getElementsByTagName('body')[0].appendChild(div);
+        let range = document.createRange();
+        range.setStartBefore(div.firstChild);
+        range.setEndAfter(div.lastChild);
+        let selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        this.execCommand('copy');
+        div.remove();
+        selection.removeAllRanges();
+        selection.addRange(previousRange);
+    }
+
+    @HostListener("cut", ['$event'])
+    protected onCut(event: ClipboardEvent): void {
+        this.onCopy(event);
+        this.execCommand('delete');
     }
 
     /**
@@ -612,6 +650,15 @@ export class NgxEmojiComponent implements OnDestroy {
             }
         }
         return emoji;
+    }
+
+    protected replaceSymbolsToEmojis(text: string): string {
+        let component = this;
+        text = text.replace(this.getEmojiRegex(), function (match) {
+            return component.createEmojiImg(component.emojiFromSymbol(match));
+        });
+        text = this.replaceAll(text, '\uFE0F', ''); // remove variation selector
+        return text;
     }
 
     /**
