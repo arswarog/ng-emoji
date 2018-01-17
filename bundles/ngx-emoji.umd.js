@@ -53,12 +53,15 @@ NgxEmojiService.ctorParameters = function () { return []; };
 /**
  * @record
  */
-/** @enum {string} */
+/** @enum {number} */
 var NgxEmojiEntityType = {
-    Bold: 'bold',
-    Italic: 'italic',
-    Underline: 'underline',
+    Bold: 0,
+    Italic: 1,
+    Underline: 2,
 };
+NgxEmojiEntityType[NgxEmojiEntityType.Bold] = "Bold";
+NgxEmojiEntityType[NgxEmojiEntityType.Italic] = "Italic";
+NgxEmojiEntityType[NgxEmojiEntityType.Underline] = "Underline";
 /**
  * @record
  */
@@ -421,15 +424,22 @@ var NgxEmojiComponent = /** @class */ (function () {
      * @return {?}
      */
     NgxEmojiComponent.prototype.normalizeEntityType = function (type) {
-        if (!type || !util.isString(type) || type.trim().length == 0) {
-            return null;
+        if (util.isString(type)) {
+            type = type.toLowerCase();
         }
-        for (var /** @type {?} */ value in NgxEmojiEntityType) {
-            if (((value)).toUpperCase() == ((type)).toUpperCase()) {
-                return /** @type {?} */ (NgxEmojiEntityType[value]);
-            }
+        switch (type) {
+            case 'bold':
+            case NgxEmojiEntityType.Bold:
+                return NgxEmojiEntityType.Bold;
+            case 'italic':
+            case NgxEmojiEntityType.Italic:
+                return NgxEmojiEntityType.Italic;
+            case 'underline':
+            case NgxEmojiEntityType.Underline:
+                return NgxEmojiEntityType.Underline;
+            default:
+                return null;
         }
-        return null;
     };
     Object.defineProperty(NgxEmojiComponent.prototype, "entities", {
         /**
@@ -446,21 +456,21 @@ var NgxEmojiComponent = /** @class */ (function () {
                             var /** @type {?} */ nodeName = node.nodeName.toUpperCase();
                             if (nodeName == 'B' || nodeName == 'STRONG') {
                                 entities.push({
-                                    type: NgxEmojiEntityType.Bold,
+                                    type: NgxEmojiEntityType[NgxEmojiEntityType.Bold].toLowerCase(),
                                     offset: offset,
                                     length: node.textContent.length
                                 });
                             }
                             if (nodeName == 'I' || nodeName == 'EM') {
                                 entities.push({
-                                    type: NgxEmojiEntityType.Italic,
+                                    type: NgxEmojiEntityType[NgxEmojiEntityType.Italic].toLowerCase(),
                                     offset: offset,
                                     length: node.textContent.length
                                 });
                             }
                             if (nodeName == 'U') {
                                 entities.push({
-                                    type: NgxEmojiEntityType.Underline,
+                                    type: NgxEmojiEntityType[NgxEmojiEntityType.Underline].toLowerCase(),
                                     offset: offset,
                                     length: node.textContent.length
                                 });
@@ -502,9 +512,14 @@ var NgxEmojiComponent = /** @class */ (function () {
             if (!util.isArray(entities)) {
                 entities = [];
             }
-            entities = entities.filter(function (entity) {
-                entity.type = component.normalizeEntityType(entity.type);
-                return (entity.type) ? true : false;
+            entities = entities.map(function (entity) {
+                return {
+                    offset: entity.offset,
+                    length: entity.length,
+                    type: component.normalizeEntityType(entity.type)
+                };
+            }).filter(function (entity) {
+                return entity.type !== null;
             });
             // Clear html formatting
             var /** @type {?} */ text = this.text;
@@ -561,7 +576,7 @@ var NgxEmojiComponent = /** @class */ (function () {
                 }
                 selection.removeAllRanges();
                 selection.addRange(range);
-                this_1.formatText(entity.type);
+                this_1.formatText(/** @type {?} */ (entity.type));
             };
             var this_1 = this;
             try {

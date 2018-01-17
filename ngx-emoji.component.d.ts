@@ -11,12 +11,12 @@ export interface SelectionRange {
     stop: number;
 }
 export declare enum NgxEmojiEntityType {
-    Bold = "bold",
-    Italic = "italic",
-    Underline = "underline",
+    Bold = 0,
+    Italic = 1,
+    Underline = 2,
 }
 export interface NgxEmojiEntity {
-    type: NgxEmojiEntityType;
+    type: NgxEmojiEntityType | string;
     offset: number;
     length: number;
 }
