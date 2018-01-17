@@ -21,7 +21,8 @@
   "$schema": "./node_modules/ng-packagr/package.schema.json",
   "files": [
     "ngx-emoji.min.css",
-    "emojis.min.css"
+    "emojis.min.css",
+    "emojis.json"
   ],
   "scripts": {
     "rimraf": "rimraf",
@@ -36,7 +37,7 @@
     "prebuild:demo": "npm run clean:demo",
     "prebuild:emoji": "npm run clean:emoji",
     "build:package": "ng-packagr -p package.json",
-    "postbuild:package": "cp-cli build-emoji/ngx-emoji.min.css dist/ngx-emoji.min.css && cp-cli build-emoji/emojis.min.css dist/emojis.min.css",
+    "postbuild:package": "cp-cli build-emoji/ngx-emoji.min.css dist/ngx-emoji.min.css && cp-cli build-emoji/emojis.min.css dist/emojis.min.css && cp-cli build-emoji/emojis.json dist/emojis.json",
     "build:demo": "webpack --config webpack.demo.js --progress --profile --bail",
     "build:emoji": "webpack --config webpack.emoji.js --progress --profile --bail",
     "build": "npm run build:emoji && npm run build:package && npm run build:demo",

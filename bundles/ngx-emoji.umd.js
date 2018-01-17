@@ -1027,7 +1027,7 @@ var NgxEmojiPickerComponent = /** @class */ (function () {
      * @return {?}
      */
     NgxEmojiPickerComponent.prototype.ngOnInit = function () {
-        this.emojis = require('../../build-emoji/emoji.json');
+        this.emojis = require('emojis.json');
     };
     /**
      * @param {?} service

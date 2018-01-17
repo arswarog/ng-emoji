@@ -920,7 +920,7 @@ class NgxEmojiPickerComponent {
      * @return {?}
      */
     ngOnInit() {
-        this.emojis = require('../../build-emoji/emoji.json');
+        this.emojis = require('emojis.json');
     }
     /**
      * @param {?} service
