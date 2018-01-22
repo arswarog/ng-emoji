@@ -1168,7 +1168,7 @@ class NgxEmojiModule {
         return NgxEmojiModule.recentMax;
     }
 }
-NgxEmojiModule.emojiBundlesPath = '/';
+NgxEmojiModule.emojiBundlesPath = 'https://cdn.rawgit.com/arswarog/ngx-emoji/build/ngx-emoji-assets/';
 NgxEmojiModule.recentMax = 20;
 NgxEmojiModule.decorators = [
     { type: NgModule, args: [{
