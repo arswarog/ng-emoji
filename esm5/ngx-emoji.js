@@ -13,15 +13,26 @@ import { CommonModule } from '@angular/common';
 import { Subject as Subject$1 } from 'rxjs/Subject';
 import { Subscription as Subscription$1 } from 'rxjs/Subscription';
 import 'ngx-emoji/ngx-emoji.min.css';
-import 'ngx-emoji/emojis.min.css';
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @record
  */
 var NgxEmojiService = /** @class */ (function () {
     function NgxEmojiService() {
         this.onEmojiPicked = new Subject$1();
     }
+    /**
+     * @return {?}
+     */
+    NgxEmojiService.getEmojis = function () {
+        if (this.emojis === null) {
+            this.emojis = require('ngx-emoji/emojis.json');
+        }
+        return this.emojis;
+    };
     /**
      * @param {?} component
      * @return {?}
@@ -36,8 +47,89 @@ var NgxEmojiService = /** @class */ (function () {
     NgxEmojiService.prototype.isActiveComponent = function (component) {
         return component === this.activeComponent;
     };
+    /**
+     * @param {?} emoji
+     * @return {?}
+     */
+    NgxEmojiService.prototype.loadEmoji = function (emoji) {
+        var /** @type {?} */ bundleId = this.getEmojiBundle(emoji);
+        if (bundleId !== null && !this.isCssBundleLoaded(bundleId)) {
+            this.loadCssBundle(bundleId);
+        }
+    };
+    /**
+     * @param {?} emoji
+     * @return {?}
+     */
+    NgxEmojiService.prototype.getEmojiBundle = function (emoji) {
+        try {
+            for (var _a = __values(NgxEmojiService.getEmojis()), _b = _a.next(); !_b.done; _b = _a.next()) {
+                var e = _b.value;
+                if (e.unified == emoji) {
+                    return e.bundle;
+                }
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        return null;
+        var e_1, _c;
+    };
+    /**
+     * @param {?} bundleId
+     * @return {?}
+     */
+    NgxEmojiService.prototype.loadCssBundle = function (bundleId) {
+        if (!this.isCssBundleLoaded(bundleId)) {
+            var /** @type {?} */ id = 'ngx-emoji-bundle-' + bundleId;
+            var /** @type {?} */ head = document.getElementsByTagName('head')[0];
+            var /** @type {?} */ link = document.createElement('link');
+            link.id = id;
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = NgxEmojiModule.getEmojiBundlesPath() + 'ngx-emoji-b' + bundleId + '.min.css';
+            link.media = 'all';
+            head.appendChild(link);
+        }
+    };
+    /**
+     * @param {?} bundleId
+     * @return {?}
+     */
+    NgxEmojiService.prototype.isCssBundleLoaded = function (bundleId) {
+        return (document.getElementById('ngx-emoji-bundle-' + bundleId)) ? true : false;
+    };
+    /**
+     * @param {?} emoji
+     * @return {?}
+     */
+    NgxEmojiService.prototype.recentPush = function (emoji) {
+        var /** @type {?} */ recent = this.getRecent();
+        if (recent.indexOf(emoji) > -1) {
+            return;
+        }
+        recent = [emoji].concat(recent)
+            .slice(0, NgxEmojiModule.getRecentMax());
+        window.localStorage.setItem('ngx-emoji-recent', recent.join(':'));
+    };
+    /**
+     * @return {?}
+     */
+    NgxEmojiService.prototype.getRecent = function () {
+        var /** @type {?} */ recent = window.localStorage.getItem('ngx-emoji-recent');
+        if (!recent) {
+            return [];
+        }
+        return recent.split(':');
+    };
     return NgxEmojiService;
 }());
+NgxEmojiService.emojis = null;
 NgxEmojiService.decorators = [
     { type: Injectable },
 ];
@@ -252,15 +344,15 @@ var NgxEmojiComponent = /** @class */ (function () {
                     img.remove();
                 }
             }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
             finally {
                 try {
                     if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                 }
-                finally { if (e_1) throw e_1.error; }
+                finally { if (e_2) throw e_2.error; }
             }
             return html.innerHTML;
-            var e_1, _c;
+            var e_2, _c;
         },
         /**
          * HTML
@@ -346,14 +438,14 @@ var NgxEmojiComponent = /** @class */ (function () {
                     }
                 }
             }
-            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            catch (e_3_1) { e_3 = { error: e_3_1 }; }
             finally {
                 try {
                     if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                 }
-                finally { if (e_2) throw e_2.error; }
+                finally { if (e_3) throw e_3.error; }
             }
-            var e_2, _c;
+            var e_3, _c;
         };
         rf(rootElement.childNodes);
         html = this.replaceAll(html, '\u00A0', ' ');
@@ -395,12 +487,12 @@ var NgxEmojiComponent = /** @class */ (function () {
                     text += '<div>' + paragraph + '</div>';
                 }
             }
-            catch (e_3_1) { e_3 = { error: e_3_1 }; }
+            catch (e_4_1) { e_4 = { error: e_4_1 }; }
             finally {
                 try {
                     if (paragraphs_1_1 && !paragraphs_1_1.done && (_a = paragraphs_1.return)) _a.call(paragraphs_1);
                 }
-                finally { if (e_3) throw e_3.error; }
+                finally { if (e_4) throw e_4.error; }
             }
             this.getNativeElement().innerHTML = text;
             if (this.getNativeElement().childNodes.length == 0) {
@@ -413,7 +505,7 @@ var NgxEmojiComponent = /** @class */ (function () {
             }
             range.setStart(lastChild, lastChild.textContent.length);
             this.lastSelectionRange = range;
-            var e_3, _a;
+            var e_4, _a;
         },
         enumerable: true,
         configurable: true
@@ -480,14 +572,14 @@ var NgxEmojiComponent = /** @class */ (function () {
                         offset += node.textContent.length;
                     }
                 }
-                catch (e_4_1) { e_4 = { error: e_4_1 }; }
+                catch (e_5_1) { e_5 = { error: e_5_1 }; }
                 finally {
                     try {
                         if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                     }
-                    finally { if (e_4) throw e_4.error; }
+                    finally { if (e_5) throw e_5.error; }
                 }
-                var e_4, _c;
+                var e_5, _c;
             };
             var /** @type {?} */ div = document.createElement('div');
             div.innerHTML = this.html;
@@ -585,12 +677,12 @@ var NgxEmojiComponent = /** @class */ (function () {
                     _loop_1(/** @type {?} */ entity);
                 }
             }
-            catch (e_5_1) { e_5 = { error: e_5_1 }; }
+            catch (e_6_1) { e_6 = { error: e_6_1 }; }
             finally {
                 try {
                     if (entities_1_1 && !entities_1_1.done && (_a = entities_1.return)) _a.call(entities_1);
                 }
-                finally { if (e_5) throw e_5.error; }
+                finally { if (e_6) throw e_6.error; }
             }
             // Restore previous state
             selection.removeAllRanges();
@@ -598,7 +690,7 @@ var NgxEmojiComponent = /** @class */ (function () {
                 selection.addRange(previousRange);
             }
             this.contenteditable = previousContenteditableState;
-            var e_5, _a;
+            var e_6, _a;
         },
         enumerable: true,
         configurable: true
@@ -872,6 +964,7 @@ var NgxEmojiComponent = /** @class */ (function () {
      * @return {?}
      */
     NgxEmojiComponent.prototype.createEmojiImg = function (emoji) {
+        this.emojiService.loadEmoji(emoji);
         return '<img class="ngx-emoji ngx-emoji-' + emoji + '" ' +
             'aria-hidden="true" ' +
             'alt="' + this.emojiToSymbol(emoji) + '" ' +
@@ -930,6 +1023,7 @@ var NgxEmojiComponent = /** @class */ (function () {
         selection.removeAllRanges();
         selection.addRange(this.lastSelectionRange);
         this.execCommand('insertHTML', this.createEmojiImg(emoji));
+        this.emojiService.recentPush(emoji);
     };
     /**
      * @param {?} html
@@ -964,14 +1058,14 @@ var NgxEmojiComponent = /** @class */ (function () {
                     }
                 }
             }
-            catch (e_6_1) { e_6 = { error: e_6_1 }; }
+            catch (e_7_1) { e_7 = { error: e_7_1 }; }
             finally {
                 try {
                     if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                 }
-                finally { if (e_6) throw e_6.error; }
+                finally { if (e_7) throw e_7.error; }
             }
-            var e_6, _c;
+            var e_7, _c;
         };
         rf(tmp.childNodes);
         tmp.remove();
@@ -1054,13 +1148,30 @@ var NgxEmojiPickerComponent = /** @class */ (function () {
      */
     function NgxEmojiPickerComponent(emojiService) {
         this.emojiService = emojiService;
-        this.emojis = [];
+        this.Object = Object;
+        this.categories = { Recent: [] };
+        this.currentCategory = 'Recent';
     }
     /**
      * @return {?}
      */
     NgxEmojiPickerComponent.prototype.ngOnInit = function () {
-        this.emojis = require('ngx-emoji/emojis.json');
+        try {
+            for (var _a = __values(NgxEmojiService.getEmojis()), _b = _a.next(); !_b.done; _b = _a.next()) {
+                var emoji = _b.value;
+                if (this.categories[emoji.category] == undefined) {
+                    this.categories[emoji.category] = null;
+                }
+            }
+        }
+        catch (e_8_1) { e_8 = { error: e_8_1 }; }
+        finally {
+            try {
+                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+            }
+            finally { if (e_8) throw e_8.error; }
+        }
+        var e_8, _c;
     };
     /**
      * @param {?} service
@@ -1088,12 +1199,89 @@ var NgxEmojiPickerComponent = /** @class */ (function () {
     NgxEmojiPickerComponent.prototype.emojiPicked = function (emoji) {
         this.emojiService.onEmojiPicked.next(emoji);
     };
+    /**
+     * @param {?} category
+     * @return {?}
+     */
+    NgxEmojiPickerComponent.prototype.selectCategory = function (category) {
+        this.currentCategory = category;
+    };
+    /**
+     * @param {?} category
+     * @return {?}
+     */
+    NgxEmojiPickerComponent.prototype.loadCategory = function (category) {
+        var /** @type {?} */ emojis = NgxEmojiService.getEmojis().filter(function (emoji) {
+            return emoji.category == category;
+        });
+        try {
+            for (var emojis_1 = __values(emojis), emojis_1_1 = emojis_1.next(); !emojis_1_1.done; emojis_1_1 = emojis_1.next()) {
+                var emoji = emojis_1_1.value;
+                this.emojiService.loadEmoji(emoji.unified);
+            }
+        }
+        catch (e_9_1) { e_9 = { error: e_9_1 }; }
+        finally {
+            try {
+                if (emojis_1_1 && !emojis_1_1.done && (_a = emojis_1.return)) _a.call(emojis_1);
+            }
+            finally { if (e_9) throw e_9.error; }
+        }
+        this.categories[category] = emojis;
+        var e_9, _a;
+    };
+    /**
+     * @return {?}
+     */
+    NgxEmojiPickerComponent.prototype.getEmojis = function () {
+        var /** @type {?} */ category = this.currentCategory;
+        if (category == 'Recent') {
+            var /** @type {?} */ recent = [];
+            try {
+                for (var _a = __values(this.emojiService.getRecent()), _b = _a.next(); !_b.done; _b = _a.next()) {
+                    var emoji = _b.value;
+                    try {
+                        for (var _c = __values(NgxEmojiService.getEmojis()), _d = _c.next(); !_d.done; _d = _c.next()) {
+                            var e = _d.value;
+                            if (e.unified == emoji) {
+                                recent.push(e);
+                                this.emojiService.loadEmoji(e.unified);
+                                break;
+                            }
+                        }
+                    }
+                    catch (e_10_1) { e_10 = { error: e_10_1 }; }
+                    finally {
+                        try {
+                            if (_d && !_d.done && (_e = _c.return)) _e.call(_c);
+                        }
+                        finally { if (e_10) throw e_10.error; }
+                    }
+                }
+            }
+            catch (e_11_1) { e_11 = { error: e_11_1 }; }
+            finally {
+                try {
+                    if (_b && !_b.done && (_f = _a.return)) _f.call(_a);
+                }
+                finally { if (e_11) throw e_11.error; }
+            }
+            return recent;
+        }
+        else {
+            if (this.categories[category] == null) {
+                this.loadCategory(category);
+            }
+            return this.categories[category];
+        }
+        var e_11, _f, e_10, _e;
+    };
     return NgxEmojiPickerComponent;
 }());
 NgxEmojiPickerComponent.decorators = [
     { type: Component, args: [{
                 selector: 'ngx-emoji-picker',
-                template: "<i *ngFor=\"let emoji of emojis\"\n   [class]=\"'ngx-emoji ngx-emoji-' + emoji.unified\"\n   aria-hidden=\"true\"\n   (click)=\"emojiPicked(emoji.unified)\"\n></i>\n"
+                template: "<ul>\n    <li *ngFor=\"let category of Object.keys(categories)\"\n        (click)=\"selectCategory(category)\">{{ category }}</li>\n</ul>\n\n<i *ngFor=\"let emoji of getEmojis()\"\n   [class]=\"'ngx-emoji ngx-emoji-' + emoji.unified\"\n   aria-hidden=\"true\"\n   (click)=\"emojiPicked(emoji.unified)\"\n></i>\n"
             },] },
 ];
 /** @nocollapse */
@@ -1110,8 +1298,36 @@ NgxEmojiPickerComponent.propDecorators = {
 var NgxEmojiModule = /** @class */ (function () {
     function NgxEmojiModule() {
     }
+    /**
+     * @param {?} path
+     * @return {?}
+     */
+    NgxEmojiModule.setEmojiBundlesPath = function (path) {
+        NgxEmojiModule.emojiBundlesPath = path;
+    };
+    /**
+     * @return {?}
+     */
+    NgxEmojiModule.getEmojiBundlesPath = function () {
+        return NgxEmojiModule.emojiBundlesPath;
+    };
+    /**
+     * @param {?} max
+     * @return {?}
+     */
+    NgxEmojiModule.setRecentMax = function (max) {
+        NgxEmojiModule.recentMax = max;
+    };
+    /**
+     * @return {?}
+     */
+    NgxEmojiModule.getRecentMax = function () {
+        return NgxEmojiModule.recentMax;
+    };
     return NgxEmojiModule;
 }());
+NgxEmojiModule.emojiBundlesPath = '/';
+NgxEmojiModule.recentMax = 20;
 NgxEmojiModule.decorators = [
     { type: NgModule, args: [{
                 imports: [

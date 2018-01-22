@@ -3,15 +3,27 @@ import { CommonModule } from '@angular/common';
 import { Subject as Subject$1 } from 'rxjs/Subject';
 import { Subscription as Subscription$1 } from 'rxjs/Subscription';
 import 'ngx-emoji/ngx-emoji.min.css';
-import 'ngx-emoji/emojis.min.css';
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+/**
+ * @record
+ */
+
 class NgxEmojiService {
     constructor() {
         this.onEmojiPicked = new Subject$1();
+    }
+    /**
+     * @return {?}
+     */
+    static getEmojis() {
+        if (this.emojis === null) {
+            this.emojis = require('ngx-emoji/emojis.json');
+        }
+        return this.emojis;
     }
     /**
      * @param {?} component
@@ -27,7 +39,77 @@ class NgxEmojiService {
     isActiveComponent(component) {
         return component === this.activeComponent;
     }
+    /**
+     * @param {?} emoji
+     * @return {?}
+     */
+    loadEmoji(emoji) {
+        let /** @type {?} */ bundleId = this.getEmojiBundle(emoji);
+        if (bundleId !== null && !this.isCssBundleLoaded(bundleId)) {
+            this.loadCssBundle(bundleId);
+        }
+    }
+    /**
+     * @param {?} emoji
+     * @return {?}
+     */
+    getEmojiBundle(emoji) {
+        for (let /** @type {?} */ e of NgxEmojiService.getEmojis()) {
+            if (e.unified == emoji) {
+                return e.bundle;
+            }
+        }
+        return null;
+    }
+    /**
+     * @param {?} bundleId
+     * @return {?}
+     */
+    loadCssBundle(bundleId) {
+        if (!this.isCssBundleLoaded(bundleId)) {
+            let /** @type {?} */ id = 'ngx-emoji-bundle-' + bundleId;
+            let /** @type {?} */ head = document.getElementsByTagName('head')[0];
+            let /** @type {?} */ link = document.createElement('link');
+            link.id = id;
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = NgxEmojiModule.getEmojiBundlesPath() + 'ngx-emoji-b' + bundleId + '.min.css';
+            link.media = 'all';
+            head.appendChild(link);
+        }
+    }
+    /**
+     * @param {?} bundleId
+     * @return {?}
+     */
+    isCssBundleLoaded(bundleId) {
+        return (document.getElementById('ngx-emoji-bundle-' + bundleId)) ? true : false;
+    }
+    /**
+     * @param {?} emoji
+     * @return {?}
+     */
+    recentPush(emoji) {
+        let /** @type {?} */ recent = this.getRecent();
+        if (recent.indexOf(emoji) > -1) {
+            return;
+        }
+        recent = [emoji].concat(recent)
+            .slice(0, NgxEmojiModule.getRecentMax());
+        window.localStorage.setItem('ngx-emoji-recent', recent.join(':'));
+    }
+    /**
+     * @return {?}
+     */
+    getRecent() {
+        let /** @type {?} */ recent = window.localStorage.getItem('ngx-emoji-recent');
+        if (!recent) {
+            return [];
+        }
+        return recent.split(':');
+    }
 }
+NgxEmojiService.emojis = null;
 NgxEmojiService.decorators = [
     { type: Injectable },
 ];
@@ -775,6 +857,7 @@ class NgxEmojiComponent {
      * @return {?}
      */
     createEmojiImg(emoji) {
+        this.emojiService.loadEmoji(emoji);
         return '<img class="ngx-emoji ngx-emoji-' + emoji + '" ' +
             'aria-hidden="true" ' +
             'alt="' + this.emojiToSymbol(emoji) + '" ' +
@@ -833,6 +916,7 @@ class NgxEmojiComponent {
         selection.removeAllRanges();
         selection.addRange(this.lastSelectionRange);
         this.execCommand('insertHTML', this.createEmojiImg(emoji));
+        this.emojiService.recentPush(emoji);
     }
     /**
      * @param {?} html
@@ -946,13 +1030,19 @@ class NgxEmojiPickerComponent {
      */
     constructor(emojiService) {
         this.emojiService = emojiService;
-        this.emojis = [];
+        this.Object = Object;
+        this.categories = { Recent: [] };
+        this.currentCategory = 'Recent';
     }
     /**
      * @return {?}
      */
     ngOnInit() {
-        this.emojis = require('ngx-emoji/emojis.json');
+        for (let /** @type {?} */ emoji of NgxEmojiService.getEmojis()) {
+            if (this.categories[emoji.category] == undefined) {
+                this.categories[emoji.category] = null;
+            }
+        }
     }
     /**
      * @param {?} service
@@ -976,11 +1066,61 @@ class NgxEmojiPickerComponent {
     emojiPicked(emoji) {
         this.emojiService.onEmojiPicked.next(emoji);
     }
+    /**
+     * @param {?} category
+     * @return {?}
+     */
+    selectCategory(category) {
+        this.currentCategory = category;
+    }
+    /**
+     * @param {?} category
+     * @return {?}
+     */
+    loadCategory(category) {
+        let /** @type {?} */ emojis = NgxEmojiService.getEmojis().filter(function (emoji) {
+            return emoji.category == category;
+        });
+        for (let /** @type {?} */ emoji of emojis) {
+            this.emojiService.loadEmoji(emoji.unified);
+        }
+        this.categories[category] = emojis;
+    }
+    /**
+     * @return {?}
+     */
+    getEmojis() {
+        let /** @type {?} */ category = this.currentCategory;
+        if (category == 'Recent') {
+            let /** @type {?} */ recent = [];
+            for (let /** @type {?} */ emoji of this.emojiService.getRecent()) {
+                for (let /** @type {?} */ e of NgxEmojiService.getEmojis()) {
+                    if (e.unified == emoji) {
+                        recent.push(e);
+                        this.emojiService.loadEmoji(e.unified);
+                        break;
+                    }
+                }
+            }
+            return recent;
+        }
+        else {
+            if (this.categories[category] == null) {
+                this.loadCategory(category);
+            }
+            return this.categories[category];
+        }
+    }
 }
 NgxEmojiPickerComponent.decorators = [
     { type: Component, args: [{
                 selector: 'ngx-emoji-picker',
-                template: `<i *ngFor="let emoji of emojis"
+                template: `<ul>
+    <li *ngFor="let category of Object.keys(categories)"
+        (click)="selectCategory(category)">{{ category }}</li>
+</ul>
+
+<i *ngFor="let emoji of getEmojis()"
    [class]="'ngx-emoji ngx-emoji-' + emoji.unified"
    aria-hidden="true"
    (click)="emojiPicked(emoji.unified)"
@@ -1001,7 +1141,35 @@ NgxEmojiPickerComponent.propDecorators = {
  * @suppress {checkTypes} checked by tsc
  */
 class NgxEmojiModule {
+    /**
+     * @param {?} path
+     * @return {?}
+     */
+    static setEmojiBundlesPath(path) {
+        NgxEmojiModule.emojiBundlesPath = path;
+    }
+    /**
+     * @return {?}
+     */
+    static getEmojiBundlesPath() {
+        return NgxEmojiModule.emojiBundlesPath;
+    }
+    /**
+     * @param {?} max
+     * @return {?}
+     */
+    static setRecentMax(max) {
+        NgxEmojiModule.recentMax = max;
+    }
+    /**
+     * @return {?}
+     */
+    static getRecentMax() {
+        return NgxEmojiModule.recentMax;
+    }
 }
+NgxEmojiModule.emojiBundlesPath = '/';
+NgxEmojiModule.recentMax = 20;
 NgxEmojiModule.decorators = [
     { type: NgModule, args: [{
                 imports: [
