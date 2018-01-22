@@ -187,11 +187,19 @@ module.exports = {
                 }
             },
             {
-                test: [path.resolve(__dirname, 'src/main/ngx-emoji-picker.component.ts')],
+                test: [path.resolve(__dirname, 'src/main/ngx-emoji.service.ts')],
                 loader: 'string-replace-loader',
                 query: {
                     search: 'ngx-emoji/emojis.json',
                     replace: '../../build-emoji/emojis.json'
+                }
+            },
+            {
+                test: [path.resolve(__dirname, 'src/demo/app.module.ts')],
+                loader: 'string-replace-loader',
+                query: {
+                    search: 'ngx-emoji-assets',
+                    replace: ''
                 }
             },
 
@@ -269,6 +277,9 @@ module.exports = {
     devServer: {
         host: 'localhost',
         port: 3000,
+        contentBase: [
+            path.resolve(__dirname, 'build-emoji')
+        ],
         watchOptions: {
             ignored: [
                 path.resolve(__dirname, '.*')

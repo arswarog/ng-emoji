@@ -709,6 +709,7 @@ export class NgxEmojiComponent implements OnDestroy {
     }
 
     protected createEmojiImg(emoji: string): string {
+        this.emojiService.loadEmoji(emoji);
         return '<img class="ngx-emoji ngx-emoji-' + emoji + '" ' +
             'aria-hidden="true" ' +
             'alt="' + this.emojiToSymbol(emoji) + '" ' +
@@ -760,6 +761,7 @@ export class NgxEmojiComponent implements OnDestroy {
             'insertHTML',
             this.createEmojiImg(emoji)
         );
+        this.emojiService.recentPush(emoji);
     }
 
     protected filterHtml(html: string, allowTags: string[] = []): string {

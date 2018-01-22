@@ -14,4 +14,7 @@ import { NgxEmojiModule } from 'main/index';
     bootstrap: [AppComponent]
 })
 export class AppModule {
+    public constructor() {
+        NgxEmojiModule.setEmojiBundlesPath('ngx-emoji-assets/');
+    }
 }

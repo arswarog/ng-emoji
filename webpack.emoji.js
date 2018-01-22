@@ -34,13 +34,16 @@ const EmojiPlugin = class HelloWorldPlugin {
     }
 
     apply(compiler) {
-        const lessPath = this.options.path;
+        const buildPath = this.options.buildPath;
+        const bundleLimit = this.options.bundleLimit;
+
         compiler.plugin('before-run', function (compilation, cb) {
-            console.log('Build emoji less to file ' + lessPath);
-            const imgDir = path.dirname(lessPath) + '/img';
-            const jsonPath = path.dirname(lessPath) + '/emojis.json';
-            if (!fs.existsSync(path.dirname(lessPath))) {
-                fs.mkdirSync(path.dirname(lessPath));
+            console.log('Build emoji less files');
+            const imgDir = buildPath + '/img';
+            const jsonPath = buildPath + '/emojis.json';
+            const categoriesPath = buildPath + '/categories.json';
+            if (!fs.existsSync(buildPath)) {
+                fs.mkdirSync(buildPath);
             }
             if (!fs.existsSync(imgDir)) {
                 fs.mkdirSync(imgDir);
@@ -48,14 +51,23 @@ const EmojiPlugin = class HelloWorldPlugin {
 
             const emojis = require('emoji-datasource/emoji.json').filter(function (emoji) {
                 return emoji.has_img_apple;
+            }).filter(function (emoji) {
+                return emoji.category != 'Skin Tones';
+            }).sort(function (a, b) {
+                if (a.category == b.categoy) {
+                    return 0;
+                }
+                return (a.category < b.category) ? -1 : 1;
             });
             console.log('Emoji data contains Apple ' + emojis.length + ' emojis');
+
             const sheetFile = path.resolve(__dirname, './node_modules/emoji-datasource/img/apple/sheets/32.png');
             let json = [];
+            let categories = [];
 
-            let i = 0;
+            let bundle = 0;
+            let bundleCounter = 0;
             for (let emoji of emojis) {
-                if (++i > 100) break;
                 gm(sheetFile)
                     .crop(32, 32, emoji.sheet_x * 34 + 1, emoji.sheet_y * 34 + 1)
                     .noProfile()
@@ -63,12 +75,27 @@ const EmojiPlugin = class HelloWorldPlugin {
                         if (err) throw err;
                     });
                 let codepoint = (emoji.non_qualified) ? emoji.non_qualified : emoji.unified;
-                fs.appendFileSync(lessPath, '.ngx-emoji-' + codepoint + ' {background-image: url("img/' + emoji.unified + '.png");}');
-                json.push({unified: codepoint});
+                fs.appendFileSync(
+                    buildPath + '/ngx-emoji-b' + bundle + '.less',
+                    '.ngx-emoji-' + codepoint + ' {background-image: url("img/' + emoji.unified + '.png") !important;}'
+                );
+                json.push({unified: codepoint, category: emoji.category, bundle: bundle});
+                categories.push(emoji.category);
+                bundleCounter++;
+                if (bundleCounter >= bundleLimit) {
+                    bundle++;
+                    bundleCounter = 0;
+                }
             }
             fs.writeFileSync(jsonPath, JSON.stringify(json));
+            fs.writeFileSync(categoriesPath, JSON.stringify(categories.filter(function (value, index, self) {
+                return self.indexOf(value) === index;
+            })));
 
-            console.info('Build emoji complete!');
+            if (bundleCounter == 0) {
+                bundle--;
+            }
+            console.info('Build emoji complete to ' + (bundle + 1) + ' bundles!');
             cb();
         });
     }
@@ -95,7 +122,14 @@ module.exports = {
      */
     entry: {
         'ngx-emoji.min': path.resolve(__dirname, 'src/main/ngx-emoji.less'),
-        'emojis.min': buildDir + '/emoji.less'
+        'ngx-emoji-b0.min': buildDir + '/ngx-emoji-b0.less',
+        'ngx-emoji-b1.min': buildDir + '/ngx-emoji-b1.less',
+        'ngx-emoji-b2.min': buildDir + '/ngx-emoji-b2.less',
+        'ngx-emoji-b3.min': buildDir + '/ngx-emoji-b3.less',
+        'ngx-emoji-b4.min': buildDir + '/ngx-emoji-b4.less',
+        'ngx-emoji-b5.min': buildDir + '/ngx-emoji-b5.less',
+        'ngx-emoji-b6.min': buildDir + '/ngx-emoji-b6.less',
+        'ngx-emoji-b7.min': buildDir + '/ngx-emoji-b7.less'
     },
 
     /**
@@ -215,7 +249,8 @@ module.exports = {
          * Build emoji CSS
          */
         new EmojiPlugin({
-            path: buildDir + '/emoji.less'
+            buildPath: buildDir,
+            bundleLimit: 200
         })
     ],
 

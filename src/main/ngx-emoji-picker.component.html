@@ -1,4 +1,9 @@
-<i *ngFor="let emoji of emojis"
+<ul>
+    <li *ngFor="let category of Object.keys(categories)"
+        (click)="selectCategory(category)">{{ category }}</li>
+</ul>
+
+<i *ngFor="let emoji of getEmojis()"
    [class]="'ngx-emoji ngx-emoji-' + emoji.unified"
    aria-hidden="true"
    (click)="emojiPicked(emoji.unified)"

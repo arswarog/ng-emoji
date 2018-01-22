@@ -4,7 +4,6 @@ import { NgxEmojiPickerComponent } from './ngx-emoji-picker.component';
 import { NgxEmojiComponent } from './ngx-emoji.component';
 import { NgxEmojiService } from './ngx-emoji.service';
 import 'ngx-emoji/ngx-emoji.min.css';
-import 'ngx-emoji/emojis.min.css';
 
 @NgModule({
     imports: [
@@ -21,4 +20,23 @@ import 'ngx-emoji/emojis.min.css';
     ]
 })
 export class NgxEmojiModule {
+    protected static emojiBundlesPath: string = 'https://cdn.rawgit.com/arswarog/ngx-emoji/build/ngx-emoji-assets/';
+    protected static recentMax: number = 20;
+
+    public static setEmojiBundlesPath(path: string): void {
+        NgxEmojiModule.emojiBundlesPath = path;
+    }
+
+    public static getEmojiBundlesPath(): string {
+        return NgxEmojiModule.emojiBundlesPath;
+    }
+
+    public static setRecentMax(max: number): void {
+        NgxEmojiModule.recentMax = max;
+    }
+
+    public static getRecentMax(): number {
+        return NgxEmojiModule.recentMax;
+    }
+
 }
