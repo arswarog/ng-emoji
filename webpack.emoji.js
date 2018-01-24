@@ -1,6 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 const gm = require('gm').subClass({imageMagick: true});
+const async = require('async');
+const maxworkers = require('os').cpus().length * 5;
 
 /**
  * Webpack Plugins
@@ -37,7 +39,7 @@ const EmojiPlugin = class HelloWorldPlugin {
         const buildPath = this.options.buildPath;
         const bundleLimit = this.options.bundleLimit;
 
-        compiler.plugin('before-run', function (compilation, cb) {
+        compiler.plugin('before-run', async function (compilation, cb) {
             console.log('Build emoji less files');
             const imgDir = buildPath + '/img';
             const jsonPath = buildPath + '/emojis.json';
@@ -67,13 +69,24 @@ const EmojiPlugin = class HelloWorldPlugin {
 
             let bundle = 0;
             let bundleCounter = 0;
+
+            let complete = 0;
+            function buildEmoji(emoji, resolve, reject) {
+                    gm(sheetFile)
+                        .crop(32, 32, emoji.sheet_x * 34 + 1, emoji.sheet_y * 34 + 1)
+                        .noProfile()
+                        .write(imgDir + '/' + emoji.unified + '.png', function (err) {
+                            process.stdout.write(`Complete ${complete++} emojis\r`);
+                            if (err) reject();
+                            resolve();
+                        });
+            }
+
+            let queue = async.queue(buildEmoji, maxworkers);
+
+            let promises = [];
             for (let emoji of emojis) {
-                gm(sheetFile)
-                    .crop(32, 32, emoji.sheet_x * 34 + 1, emoji.sheet_y * 34 + 1)
-                    .noProfile()
-                    .write(imgDir + '/' + emoji.unified + '.png', function (err) {
-                        if (err) throw err;
-                    });
+                promises.push(new Promise((resolve, reject) => queue.push(emoji, resolve, reject)));
                 let codepoint = (emoji.non_qualified) ? emoji.non_qualified : emoji.unified;
                 fs.appendFileSync(
                     buildPath + '/ngx-emoji-b' + bundle + '.less',
@@ -87,6 +100,9 @@ const EmojiPlugin = class HelloWorldPlugin {
                     bundleCounter = 0;
                 }
             }
+
+            await Promise.all(promises);
+            console.log(`Complete croping ${promises.length} emojis`);
             fs.writeFileSync(jsonPath, JSON.stringify(json));
             fs.writeFileSync(categoriesPath, JSON.stringify(categories.filter(function (value, index, self) {
                 return self.indexOf(value) === index;
