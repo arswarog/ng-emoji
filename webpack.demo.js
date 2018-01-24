@@ -214,6 +214,23 @@ module.exports = function () {
                         // use style-loader in development
                         fallback: "style-loader"
                     })
+                },
+
+                /**
+                 * Loads files as `base64` encoded URL
+                 *
+                 * see: https://github.com/webpack-contrib/url-loader
+                 */
+                {
+                    test: /\.png$/,
+                    use: [
+                        {
+                            loader: 'url-loader',
+                            options: {
+                                limit: 100000
+                            }
+                        }
+                    ]
                 }
             ]
         },

@@ -54,10 +54,10 @@ const EmojiPlugin = class HelloWorldPlugin {
             }).filter(function (emoji) {
                 return emoji.category != 'Skin Tones';
             }).sort(function (a, b) {
-                if (a.category == b.categoy) {
+                if (a.sort_order == b.sort_order) {
                     return 0;
                 }
-                return (a.category < b.category) ? -1 : 1;
+                return (a.sort_order < b.sort_order) ? -1 : 1;
             });
             console.log('Emoji data contains Apple ' + emojis.length + ' emojis');
 

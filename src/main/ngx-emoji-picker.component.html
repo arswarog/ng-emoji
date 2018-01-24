@@ -1,10 +1,13 @@
-<ul>
-    <li *ngFor="let category of Object.keys(categories)"
-        (click)="selectCategory(category)">{{ category }}</li>
-</ul>
-
 <i *ngFor="let emoji of getEmojis()"
    [class]="'ngx-emoji ngx-emoji-' + emoji.unified"
    aria-hidden="true"
    (click)="emojiPicked(emoji.unified)"
 ></i>
+<hr>
+<img *ngFor="let category of getCategories()"
+     [class]="'ngx-emoji-cat ' + category.class"
+     aria-hidden="true"
+     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+     [alt]="category.name"
+     (click)="selectCategory(category.name)"
+>

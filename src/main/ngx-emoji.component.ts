@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ElementRef, Input, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, OnDestroy, ElementRef, Input, Output, EventEmitter, HostListener, OnChanges } from '@angular/core';
 import { NgxEmojiService } from "./ngx-emoji.service";
 import { Subscription } from "rxjs/Subscription";
 import { NgxEmojiPickerComponent } from "./ngx-emoji-picker.component";
@@ -16,20 +16,27 @@ export interface SelectionRange {
 export enum NgxEmojiEntityType {
     Bold,
     Italic,
-    Underline
+    Underline,
+    Strike,
+    Code,
+    Pre,
+    Command,
+    Url,
+    TextLink
 }
 
 export interface NgxEmojiEntity {
     type: NgxEmojiEntityType | string;
     offset: number;
     length: number;
+    url?: string;
 }
 
 @Component({
     selector: 'ngx-emoji',
     template: ''
 })
-export class NgxEmojiComponent implements OnDestroy {
+export class NgxEmojiComponent implements OnDestroy, OnChanges {
     private _contenteditable: boolean = false;
     private _enterOn: EnterOn = {
         shift: false,
@@ -44,7 +51,10 @@ export class NgxEmojiComponent implements OnDestroy {
     protected emojiService: NgxEmojiService;
     protected emojiServiceSubscription: Subscription = new Subscription();
     protected lastSelectionRange: Range;
-    protected readonly allowedTags = ['b', 'i', 'u', 'strong', 'em'];
+    protected readonly allowedTags = [
+        'b', 'i', 'u', 'strong', 'em',
+        'strike', 'code', 'pre', 'a'
+    ];
 
     public constructor(
         protected elRef: ElementRef,
@@ -155,14 +165,23 @@ export class NgxEmojiComponent implements OnDestroy {
     public readonly onEnterOn: EventEmitter<EnterOn> = new EventEmitter<EnterOn>();
 
     public enterKeyIsEnter(): boolean {
+        if (this.onEnter.observers.length == 0) {
+            return false;
+        }
         return !this.enterKeyIsShiftEnter() && !this.enterKeyIsCtrlEnter();
     }
 
     public enterKeyIsCtrlEnter(): boolean {
+        if (this.onEnter.observers.length == 0) {
+            return false;
+        }
         return (this.enterOn.ctrl) ? true : false;
     }
 
     public enterKeyIsShiftEnter(): boolean {
+        if (this.onEnter.observers.length == 0) {
+            return false;
+        }
         return (this.enterOn.shift) ? true : false;
     }
 
@@ -209,17 +228,26 @@ export class NgxEmojiComponent implements OnDestroy {
         return this.getHtml(this.getNativeElement());
     }
 
-    protected getHtml(rootElement: HTMLElement): string {
+    protected getHtml(rootElement: HTMLElement, withCommands: boolean = false): string {
         let component = this;
         let html = '';
         let rf = function (nodes: NodeList): void {
             for (let node of component.arrayOfNodeList(nodes)) {
                 let blockNode = component.isBlockNode(node);
+                if (node.nodeName == 'PRE') {
+                    blockNode = false;
+                }
                 if (component.isEmojiNode(node)) {
                     html += component.emojiToSymbol(component.emojiFromNode(node));
                 } else if (node.hasChildNodes()) {
                     if (!blockNode) {
-                        html += '<' + node.nodeName.toLowerCase() + '>';
+                        if (node instanceof HTMLAnchorElement) {
+                            html += '<' + node.nodeName.toLowerCase() + ' href="' + node.getAttribute('href') + '">';
+                        } else if ((node as HTMLElement).classList.contains('command')) {
+                            html += '<' + node.nodeName.toLowerCase() + ' class="command">';
+                        } else {
+                            html += '<' + node.nodeName.toLowerCase() + '>';
+                        }
                     }
                     rf(node.childNodes); // recursion...
                     if (!blockNode) {
@@ -259,7 +287,7 @@ export class NgxEmojiComponent implements OnDestroy {
         rf(rootElement.childNodes);
         html = this.replaceAll(html, '\u00A0', ' ');
         html = this.replaceAll(html, '&nbsp;', ' ');
-        return this.filterHtml(html, this.allowedTags);
+        return this.filterHtml(html, this.allowedTags, withCommands);
     }
 
     @Output('html')
@@ -276,7 +304,6 @@ export class NgxEmojiComponent implements OnDestroy {
         }
         this.prevent.text = text;
 
-        let component = this;
         text = this.filterHtml(text);
         text = this.replaceAll(text, '\u00A0', ' ');
         text = this.replaceAll(text, '  ', '&nbsp;&nbsp;');
@@ -331,6 +358,24 @@ export class NgxEmojiComponent implements OnDestroy {
             case 'underline':
             case NgxEmojiEntityType.Underline:
                 return NgxEmojiEntityType.Underline;
+            case 'strike':
+            case NgxEmojiEntityType.Strike:
+                return NgxEmojiEntityType.Strike;
+            case 'code':
+            case NgxEmojiEntityType.Code:
+                return NgxEmojiEntityType.Code;
+            case 'pre':
+            case NgxEmojiEntityType.Pre:
+                return NgxEmojiEntityType.Pre;
+            case 'command':
+            case NgxEmojiEntityType.Command:
+                return NgxEmojiEntityType.Command;
+            case 'url':
+            case NgxEmojiEntityType.Url:
+                return NgxEmojiEntityType.Url;
+            case 'text_link':
+            case NgxEmojiEntityType.TextLink:
+                return NgxEmojiEntityType.TextLink;
             default:
                 return null;
         }
@@ -355,7 +400,8 @@ export class NgxEmojiComponent implements OnDestroy {
             return {
                 offset: entity.offset,
                 length: entity.length,
-                type: component.normalizeEntityType(entity.type)
+                type: component.normalizeEntityType(entity.type),
+                url: entity.url
             };
         }).filter(function (entity) {
             return entity.type !== null;
@@ -416,7 +462,17 @@ export class NgxEmojiComponent implements OnDestroy {
             }
             selection.removeAllRanges();
             selection.addRange(range);
-            this.formatText(entity.type as NgxEmojiEntityType);
+            switch (entity.type) {
+                case NgxEmojiEntityType.TextLink:
+                    this.formatText(NgxEmojiEntityType.TextLink, entity.url);
+                    break;
+                case NgxEmojiEntityType.Url:
+                    this.formatText(NgxEmojiEntityType.Url, range.cloneContents().textContent);
+                    break;
+                default:
+                    this.formatText(entity.type as NgxEmojiEntityType);
+                    break;
+            }
         }
 
         // Restore previous state
@@ -436,21 +492,66 @@ export class NgxEmojiComponent implements OnDestroy {
                     let nodeName = node.nodeName.toUpperCase();
                     if (nodeName == 'B' || nodeName == 'STRONG') {
                         entities.push({
-                            type: NgxEmojiEntityType[NgxEmojiEntityType.Bold].toLowerCase(),
+                            type: NgxEmojiEntityType.Bold,
                             offset: offset,
                             length: node.textContent.length
                         });
                     }
                     if (nodeName == 'I' || nodeName == 'EM') {
                         entities.push({
-                            type: NgxEmojiEntityType[NgxEmojiEntityType.Italic].toLowerCase(),
+                            type: NgxEmojiEntityType.Italic,
                             offset: offset,
                             length: node.textContent.length
                         });
                     }
                     if (nodeName == 'U') {
                         entities.push({
-                            type: NgxEmojiEntityType[NgxEmojiEntityType.Underline].toLowerCase(),
+                            type: NgxEmojiEntityType.Underline,
+                            offset: offset,
+                            length: node.textContent.length
+                        });
+                    }
+                    if (nodeName == 'STRIKE') {
+                        entities.push({
+                            type: NgxEmojiEntityType.Strike,
+                            offset: offset,
+                            length: node.textContent.length
+                        });
+                    }
+                    if (nodeName == 'CODE') {
+                        entities.push({
+                            type: NgxEmojiEntityType.Code,
+                            offset: offset,
+                            length: node.textContent.length
+                        });
+                    }
+                    if (nodeName == 'PRE') {
+                        entities.push({
+                            type: NgxEmojiEntityType.Pre,
+                            offset: offset,
+                            length: node.textContent.length
+                        });
+                    }
+                    if (nodeName == 'A' && node instanceof HTMLAnchorElement
+                        && node.getAttribute('href') == node.textContent) {
+                        entities.push({
+                            type: NgxEmojiEntityType.Url,
+                            offset: offset,
+                            length: node.textContent.length
+                        });
+                    }
+                    if (nodeName == 'A' && node instanceof HTMLAnchorElement
+                        && node.getAttribute('href') != node.textContent) {
+                        entities.push({
+                            type: NgxEmojiEntityType.TextLink,
+                            offset: offset,
+                            length: node.textContent.length,
+                            url: node.textContent
+                        });
+                    }
+                    if (node instanceof HTMLElement && node.classList.contains('command')) {
+                        entities.push({
+                            type: NgxEmojiEntityType.Command,
                             offset: offset,
                             length: node.textContent.length
                         });
@@ -461,9 +562,17 @@ export class NgxEmojiComponent implements OnDestroy {
             }
         };
         let div = document.createElement('div');
-        div.innerHTML = this.html;
+        div.innerHTML = this.getHtml(this.getNativeElement(), true);
         rf(div.childNodes, 0);
         div.remove();
+        entities = entities.map(function (entity) {
+            if (entity.type == NgxEmojiEntityType.TextLink) {
+                entity.type = 'text_link';
+            } else {
+                entity.type = NgxEmojiEntityType[entity.type as number].toLowerCase();
+            }
+            return entity;
+        });
         return entities;
     }
 
@@ -511,6 +620,8 @@ export class NgxEmojiComponent implements OnDestroy {
         event.preventDefault();
         if (this.enterKeyIsShiftEnter()) {
             this.emitEnter();
+        } else {
+            this.insertNewLine();
         }
     }
 
@@ -583,7 +694,10 @@ export class NgxEmojiComponent implements OnDestroy {
         } else if (event.clipboardData.types.indexOf('text/plain') > -1) {
             html = event.clipboardData.getData('text/plain');
         }
-        html = this.filterHtml(html, this.allowedTags);
+        html = html.split('\n').map(function (line, index) {
+            return (index > 0) ? '<div>' + line + '</div>' : line;
+        }).join('');
+        html = this.filterHtml(html, this.allowedTags.concat(['div']));
         html = this.replaceSymbolsToEmojis(html);
         this.execCommand('insertHTML', html);
     }
@@ -640,6 +754,37 @@ export class NgxEmojiComponent implements OnDestroy {
     /**
      * Internal
      */
+
+    public ngOnChanges(): void {
+        /*this.applyCommands();
+        this.applyUrls();*/
+        this.applyCommands();
+    }
+
+    protected applyCommands(): void {
+        /*let matches = this.text.match(/(^|\W)\/[a-z0-9]+($|\W)/ig);
+        if (matches) {
+            matches.map(function (value) {
+                console.log(value);
+            });
+        }*/
+        let component = this;
+        let rf = function (nodes: NodeList): void {
+            for (let node of component.arrayOfNodeList(nodes)) {
+                //
+            }
+        };
+        rf(this.getNativeElement().childNodes);
+    }
+
+    protected applyUrls(): void {
+        let matches = this.text.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/ig);
+        if (matches) {
+            matches.map(function (value) {
+                console.log(value);
+            });
+        }
+    }
 
     protected arrayOfNodeList<T extends Node>(list: NodeListOf<T>): T[] {
         let result: T[] = [];
@@ -701,7 +846,49 @@ export class NgxEmojiComponent implements OnDestroy {
     }
 
     protected execCommand(command: string, value?: any): boolean {
-        return document.execCommand(command, false, value);
+        switch (command) {
+            case 'code':
+                return this.execCommandTag('code');
+            case 'pre':
+                return this.execCommandTag('pre');
+            case 'command':
+                return this.execCommandTag('span', [{name: 'class', value: 'command'}]);
+            default:
+                return document.execCommand(command, false, value);
+        }
+    }
+
+    protected execCommandTag(tag: string, attributes: { name: string, value: string }[] = []): boolean {
+        let component = this;
+        this.execCommand('superscript');
+        let tmp = document.createElement("div");
+        tmp.innerHTML = this.getNativeElement().innerHTML;
+        let html = '';
+        let rf = function (nodes: NodeList): void {
+            for (let node of component.arrayOfNodeList(nodes)) {
+                if (node.nodeType == node.ELEMENT_NODE) {
+                    let nodeName = node.nodeName.toLowerCase();
+                    if (nodeName == 'sup') {
+                        nodeName = tag;
+                        html += '<' + tag;
+                        for (let attr of attributes) {
+                            html += ' ' + attr.name + '="' + attr.value + '"';
+                        }
+                        html += '>';
+                    } else {
+                        html += '<' + nodeName + '>';
+                    }
+                    rf(node.childNodes);
+                    html += '</' + nodeName + '>';
+                } else {
+                    html += node.textContent;
+                }
+            }
+        };
+        rf(tmp.childNodes);
+        tmp.remove();
+        this.getNativeElement().innerHTML = html;
+        return true;
     }
 
     protected insertNewLine(): void {
@@ -764,7 +951,7 @@ export class NgxEmojiComponent implements OnDestroy {
         this.emojiService.recentPush(emoji);
     }
 
-    protected filterHtml(html: string, allowTags: string[] = []): string {
+    protected filterHtml(html: string, allowTags: string[] = [], withCommands: boolean = false): string {
         let component = this;
         allowTags = allowTags.map(function (value) {
             return value.toUpperCase();
@@ -775,8 +962,15 @@ export class NgxEmojiComponent implements OnDestroy {
         let rf = function (nodes: NodeList): void {
             for (let node of component.arrayOfNodeList(nodes)) {
                 if (node.nodeType == node.ELEMENT_NODE) {
-                    if (allowTags.indexOf(node.nodeName) > -1) {
-                        html += '<' + node.nodeName.toLowerCase() + '>';
+                    if (allowTags.indexOf(node.nodeName) > -1
+                        || withCommands && (node as HTMLElement).classList.contains('command')) {
+                        if (node instanceof HTMLAnchorElement) {
+                            html += '<' + node.nodeName.toLowerCase() + ' href="' + node.getAttribute('href') + '">';
+                        } else if (withCommands && (node as HTMLElement).classList.contains('command')) {
+                            html += '<' + node.nodeName.toLowerCase() + ' class="command">';
+                        } else {
+                            html += '<' + node.nodeName.toLowerCase() + '>';
+                        }
                         rf(node.childNodes);
                         html += '</' + node.nodeName.toLowerCase() + '>';
                     } else {
@@ -792,7 +986,7 @@ export class NgxEmojiComponent implements OnDestroy {
         return html;
     }
 
-    protected formatText(type: NgxEmojiEntityType): void {
+    protected formatText(type: NgxEmojiEntityType, value?: string): void {
         switch (type) {
             case NgxEmojiEntityType.Bold:
                 this.execCommand('bold');
@@ -802,6 +996,22 @@ export class NgxEmojiComponent implements OnDestroy {
                 break;
             case NgxEmojiEntityType.Underline:
                 this.execCommand('underline');
+                break;
+            case NgxEmojiEntityType.Pre:
+                this.execCommand('pre');
+                break;
+            case NgxEmojiEntityType.Code:
+                this.execCommand('code');
+                break;
+            case NgxEmojiEntityType.Strike:
+                this.execCommand('strikeThrough');
+                break;
+            case NgxEmojiEntityType.Command:
+                this.execCommand('command');
+                break;
+            case NgxEmojiEntityType.TextLink:
+            case NgxEmojiEntityType.Url:
+                this.execCommand('createLink', value);
                 break;
         }
     }

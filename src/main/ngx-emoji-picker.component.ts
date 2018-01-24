@@ -11,8 +11,17 @@ export interface NgxEmojiPickerCategories {
     templateUrl: './ngx-emoji-picker.component.html'
 })
 export class NgxEmojiPickerComponent implements OnInit {
-    private Object: Object = Object;
-    protected categories: NgxEmojiPickerCategories = {Recent: []};
+    protected categories: NgxEmojiPickerCategories = {
+        Recent: [],
+        "Smileys & People": null,
+        "Animals & Nature": null,
+        "Food & Drink": null,
+        Objects: null,
+        "Travel & Places": null,
+        Activities: null,
+        Symbols: null,
+        Flags: null
+    };
     protected currentCategory: string = 'Recent';
 
     public constructor(
@@ -21,11 +30,6 @@ export class NgxEmojiPickerComponent implements OnInit {
     }
 
     public ngOnInit(): void {
-        for (let emoji of NgxEmojiService.getEmojis()) {
-            if (this.categories[emoji.category] == undefined) {
-                this.categories[emoji.category] = null;
-            }
-        }
     }
 
     public setEmojiService(service: NgxEmojiService): void {
@@ -76,6 +80,19 @@ export class NgxEmojiPickerComponent implements OnInit {
             }
             return this.categories[category];
         }
+    }
+
+    protected getCategories(): { name: string, class: string }[] {
+        return Object.keys(this.categories).map(function (value) {
+            return {
+                name: value,
+                class: 'ngx-emoji-cat-' + value
+                    .replace('&', '')
+                    .replace('  ', ' ')
+                    .replace(' ', '-')
+                    .toLowerCase()
+            };
+        });
     }
 
 }
