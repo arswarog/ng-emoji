@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ElementRef, Input, Output, EventEmitter, HostListener, OnChanges } from '@angular/core';
+import { Component, OnDestroy, ElementRef, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { NgxEmojiService } from "./ngx-emoji.service";
 import { Subscription } from "rxjs/Subscription";
 import { NgxEmojiPickerComponent } from "./ngx-emoji-picker.component";
@@ -36,7 +36,7 @@ export interface NgxEmojiEntity {
     selector: 'ngx-emoji',
     template: ''
 })
-export class NgxEmojiComponent implements OnDestroy, OnChanges {
+export class NgxEmojiComponent implements OnDestroy {
     private _contenteditable: boolean = false;
     private _enterOn: EnterOn = {
         shift: false,
@@ -73,6 +73,9 @@ export class NgxEmojiComponent implements OnDestroy, OnChanges {
         let range = document.createRange();
         range.setStart(this.getNativeElement().firstChild, 0);
         this.lastSelectionRange = range;
+        this.getNativeElement().addEventListener('DOMSubtreeModified', function () {
+            component.onChanges();
+        });
 
         /**
          * see: onFocusout()
@@ -755,34 +758,18 @@ export class NgxEmojiComponent implements OnDestroy, OnChanges {
      * Internal
      */
 
-    public ngOnChanges(): void {
-        /*this.applyCommands();
-        this.applyUrls();*/
-        this.applyCommands();
-    }
-
-    protected applyCommands(): void {
-        /*let matches = this.text.match(/(^|\W)\/[a-z0-9]+($|\W)/ig);
-        if (matches) {
-            matches.map(function (value) {
-                console.log(value);
-            });
-        }*/
-        let component = this;
-        let rf = function (nodes: NodeList): void {
-            for (let node of component.arrayOfNodeList(nodes)) {
-                //
-            }
-        };
-        rf(this.getNativeElement().childNodes);
-    }
-
-    protected applyUrls(): void {
-        let matches = this.text.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/ig);
-        if (matches) {
-            matches.map(function (value) {
-                console.log(value);
-            });
+    protected onChanges(): void {
+        if (this.onText.observers.length > 0) {
+            this.onText.emit(this.text);
+        }
+        if (this.onEntities.observers.length > 0) {
+            this.onEntities.emit(this.entities);
+        }
+        if (this.onFullHtml.observers.length > 0) {
+            this.onFullHtml.emit(this.fullHtml);
+        }
+        if (this.onHtml.observers.length > 0) {
+            this.onHtml.emit(this.html);
         }
     }
 
