@@ -2,11 +2,32 @@ import { Component } from '@angular/core';
 import { NgxEmojiComponent, NgxEmojiEntity } from "../main";
 import { isArray } from "util";
 
+class ChatMessage {
+    text: string = '';
+    entities: NgxEmojiEntity[] = [];
+
+    constructor(text: string = '', entities: NgxEmojiEntity[] = []) {
+        this.text = text;
+        this.entities = entities;
+    }
+}
+
 @Component({
     selector: 'body',
     templateUrl: './app.html'
 })
 export class AppComponent {
+
+    // ChatDemo
+    public sendByShift = false;
+    public chatMessages: ChatMessage[] = [
+        new ChatMessage('Now messages is perfect!', [ {
+            type   : 'bold',
+            offset : 16,
+            length : 7,
+        } ]),
+    ];
+    public newMessage: ChatMessage = new ChatMessage('Your message');
 
     // Global
     protected window = window;
@@ -57,4 +78,11 @@ export class AppComponent {
         component.entities = en;
     }
 
+    // ChatDemo functions
+    public sendMessage() {
+        this.chatMessages.unshift(this.newMessage);
+        this.newMessage = this.newMessage;
+        if (this.chatMessages.length > 5)
+            this.chatMessages.length = 5;
+    }
 }
