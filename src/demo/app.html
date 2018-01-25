@@ -18,6 +18,7 @@
                         <div class="row mb-3 chat-demo">
                             <div class="col-md-10">
                                 <ngx-emoji class="send-message"
+                                           placeholder="Your message"
                                            contenteditable="true"
                                            [(text)]="newMessage.text"
                                            [(entities)]="newMessage.entities"
@@ -550,6 +551,12 @@ export class AppComponent &#123;
                 <th scope="row">(contenteditable)</th>
                 <td>Event(bool)</td>
                 <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th scope="row">placeholder</th>
+                <td>string</td>
+                <td><i>empty string</i></td>
                 <td></td>
             </tr>
             <tr>
