@@ -18,6 +18,7 @@
                         <div class="row mb-3 chat-demo">
                             <div class="col-md-10">
                                 <ngx-emoji class="send-message"
+                                           placeholder="Your message"
                                            contenteditable="true"
                                            [(text)]="newMessage.text"
                                            [(entities)]="newMessage.entities"
@@ -132,6 +133,64 @@
 <span class="d-none">\</span>&#123;<span class="d-none">\</span>&#123; chatDemo.fullHtml &#125;&#125;</code></pre>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="card mb-3 long-post-demo">
+            <div class="card-header">Long Post Demo</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <ngx-emoji class="post"
+                                   contenteditable="true"
+                                   [text]="'Text'"
+                        ></ngx-emoji>
+                    </div>
+                    <div class="col-md-4">
+                        <ngx-emoji-picker></ngx-emoji-picker>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Emoji picker</div>
+                    <div class="card-body">
+                        <ngx-emoji-picker></ngx-emoji-picker>
+                    </div>
+                    <div class="card-footer">
+                        <code class="text-primary">
+                            &lt;ngx-emoji-picker&gt;&lt;/ngx-emoji-picker&gt;
+                        </code>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Emoji picker</div>
+                    <div class="card-body">
+                        <ngx-emoji-picker></ngx-emoji-picker>
+                    </div>
+                    <div class="card-footer">
+                        <code class="text-primary">
+                            &lt;ngx-emoji-picker&gt;&lt;/ngx-emoji-picker&gt;
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">Emoji picker</div>
+            <div class="card-body">
+                <ngx-emoji-picker></ngx-emoji-picker>
+            </div>
+            <div class="card-footer">
+                <code class="text-primary">
+                    &lt;ngx-emoji-picker&gt;&lt;/ngx-emoji-picker&gt;
+                </code>
             </div>
         </div>
 
@@ -493,6 +552,12 @@ export class AppComponent &#123;
                 <th scope="row">(contenteditable)</th>
                 <td>Event(bool)</td>
                 <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th scope="row">placeholder</th>
+                <td>string</td>
+                <td><i>empty string</i></td>
                 <td></td>
             </tr>
             <tr>

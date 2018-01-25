@@ -56,6 +56,11 @@ export class NgxEmojiComponent implements OnDestroy {
         'strike', 'code', 'pre', 'a'
     ];
 
+    @Input()
+    set placeholder(value: string) {
+        this.getNativeElement().dataset['placeholder'] = value;
+    }
+
     public constructor(
         protected elRef: ElementRef,
         globalEmojiService: NgxEmojiService

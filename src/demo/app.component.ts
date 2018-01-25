@@ -27,7 +27,7 @@ export class AppComponent {
             length : 7,
         } ]),
     ];
-    public newMessage: ChatMessage = new ChatMessage('Your message');
+    public newMessage: ChatMessage = new ChatMessage();
 
     // Global
     protected window = window;

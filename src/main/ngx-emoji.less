@@ -17,6 +17,11 @@ ngx-emoji .command {
   color: blue;
 }
 
+ngx-emoji[contentEditable=true]:empty:not(:focus):before{
+  opacity: 0.4;
+  content:attr(data-placeholder)
+}
+
 .ngx-emoji {
   display: inline-block;
   width: 0px;
