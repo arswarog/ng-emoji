@@ -145,15 +145,15 @@ export class NgxEmojiComponent implements OnDestroy {
     public set contenteditable(editable: boolean) {
         this._contenteditable = editable;
         this.elRef.nativeElement.setAttribute('contenteditable', editable);
-        this.onContenteditable.emit(editable);
+        this.contenteditableChange.emit(editable);
     }
 
     public get contenteditable(): boolean {
         return this._contenteditable;
     }
 
-    @Output('contenteditable')
-    public readonly onContenteditable: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output('contenteditableChange')
+    public readonly contenteditableChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
     /**
      * Enter on
@@ -162,15 +162,15 @@ export class NgxEmojiComponent implements OnDestroy {
     @Input('enterOn')
     public set enterOn(enterOn: EnterOn) {
         this._enterOn = enterOn;
-        this.onEnterOn.emit(enterOn);
+        this.enterOnChange.emit(enterOn);
     }
 
     public get enterOn(): EnterOn {
         return this._enterOn;
     }
 
-    @Output('enterOn')
-    public readonly onEnterOn: EventEmitter<EnterOn> = new EventEmitter<EnterOn>();
+    @Output('enterOnChange')
+    public readonly enterOnChange: EventEmitter<EnterOn> = new EventEmitter<EnterOn>();
 
     public enterKeyIsEnter(): boolean {
         if (this.onEnter.observers.length == 0) {
@@ -220,8 +220,8 @@ export class NgxEmojiComponent implements OnDestroy {
         return html.innerHTML;
     }
 
-    @Output('fullHtml')
-    public readonly onFullHtml: EventEmitter<string> = new EventEmitter<string>();
+    @Output('fullHtmlChange')
+    public readonly fullHtmlChange: EventEmitter<string> = new EventEmitter<string>();
 
     /**
      * HTML wihout parahraphs
@@ -298,8 +298,8 @@ export class NgxEmojiComponent implements OnDestroy {
         return this.filterHtml(html, this.allowedTags, withCommands);
     }
 
-    @Output('html')
-    public readonly onHtml: EventEmitter<string> = new EventEmitter<string>();
+    @Output('htmlChange')
+    public readonly htmlChange: EventEmitter<string> = new EventEmitter<string>();
 
     /**
      * Text
@@ -307,7 +307,7 @@ export class NgxEmojiComponent implements OnDestroy {
 
     @Input('text')
     public set text(text: string) {
-        if (!this.contenteditable && text == this.prevent.text) {
+        if (text == this.prevent.text) {
             return;
         }
         this.prevent.text = text;
@@ -345,8 +345,8 @@ export class NgxEmojiComponent implements OnDestroy {
         return this.filterHtml(this.html);
     }
 
-    @Output('text')
-    public readonly onText: EventEmitter<string> = new EventEmitter<string>();
+    @Output('textChange')
+    public readonly textChange: EventEmitter<string> = new EventEmitter<string>();
 
     /**
      * Entities
@@ -391,7 +391,7 @@ export class NgxEmojiComponent implements OnDestroy {
 
     @Input('entities')
     public set entities(entities: NgxEmojiEntity[]) {
-        if (!this.contenteditable && JSON.stringify(entities) == JSON.stringify(this.prevent.entities)) {
+        if (JSON.stringify(entities) == JSON.stringify(this.prevent.entities)) {
             return;
         }
         this.prevent.entities = entities;
@@ -584,8 +584,8 @@ export class NgxEmojiComponent implements OnDestroy {
         return entities;
     }
 
-    @Output('entities')
-    public readonly onEntities: EventEmitter<NgxEmojiEntity[]> = new EventEmitter<NgxEmojiEntity[]>();
+    @Output('entitiesChange')
+    public readonly entitiesChange: EventEmitter<NgxEmojiEntity[]> = new EventEmitter<NgxEmojiEntity[]>();
 
     /**
      * Enter events
@@ -634,10 +634,10 @@ export class NgxEmojiComponent implements OnDestroy {
     }
 
     protected emitEnter(): void {
-        this.onText.emit(this.text);
-        this.onEntities.emit(this.entities);
-        this.onFullHtml.emit(this.fullHtml);
-        this.onHtml.emit(this.html);
+        this.textChange.emit(this.text);
+        this.entitiesChange.emit(this.entities);
+        this.fullHtmlChange.emit(this.fullHtml);
+        this.htmlChange.emit(this.html);
         this.onEnter.emit();
     }
 
@@ -781,17 +781,17 @@ export class NgxEmojiComponent implements OnDestroy {
      */
 
     protected onChanges(): void {
-        if (this.onText.observers.length > 0) {
-            this.onText.emit(this.text);
+        if (this.textChange.observers.length > 0) {
+            this.textChange.emit(this.text);
         }
-        if (this.onEntities.observers.length > 0) {
-            this.onEntities.emit(this.entities);
+        if (this.entitiesChange.observers.length > 0) {
+            this.entitiesChange.emit(this.entities);
         }
-        if (this.onFullHtml.observers.length > 0) {
-            this.onFullHtml.emit(this.fullHtml);
+        if (this.fullHtmlChange.observers.length > 0) {
+            this.fullHtmlChange.emit(this.fullHtml);
         }
-        if (this.onHtml.observers.length > 0) {
-            this.onHtml.emit(this.html);
+        if (this.htmlChange.observers.length > 0) {
+            this.htmlChange.emit(this.html);
         }
     }
 

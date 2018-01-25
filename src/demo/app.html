@@ -226,7 +226,7 @@
                     <div class="card-body">
                         <ngx-emoji contenteditable="true"
                                    [text]="'Input text\nLine 2 ☕'"
-                                   (text)="editText = $event"
+                                   (textChange)="editText = $event"
                                    [enterOn]="{shift: true, ctrl: false}"
                                    (enter)="window.alert('You say: &#8220;' + editText + '&#8221;');"
                         ></ngx-emoji>
