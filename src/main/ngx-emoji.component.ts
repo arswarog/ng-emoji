@@ -637,6 +637,20 @@ export class NgxEmojiComponent implements OnDestroy {
     }
 
     /**
+     * Event command
+     */
+
+    @Output('command')
+    public readonly onCommand: EventEmitter<void> = new EventEmitter<void>();
+
+    /**
+     * Event link
+     */
+
+    @Output('link')
+    public readonly onLink: EventEmitter<void> = new EventEmitter<void>();
+
+    /**
      * Keyboard events
      */
 
@@ -742,15 +756,18 @@ export class NgxEmojiComponent implements OnDestroy {
 
     @HostListener("click", ['$event'])
     protected onClick(event: MouseEvent): void {
-        if (!this.contenteditable) {
-            return;
-        }
-        if (this.isEmojiNode(event.toElement)) {
+        if (this.contenteditable && this.isEmojiNode(event.toElement)) {
             let range = document.createRange();
             range.setStartBefore(event.toElement);
             let selection = window.getSelection();
             selection.removeAllRanges();
             selection.addRange(range);
+        }
+        if (event.toElement.classList.contains('command')) {
+            this.onCommand.emit();
+        }
+        if (event.toElement instanceof HTMLAnchorElement) {
+            this.onLink.emit();
         }
     }
 
@@ -904,6 +921,16 @@ export class NgxEmojiComponent implements OnDestroy {
             console.warn('Convert emoji ' + emoji + ' error: ' + error.message);
             emoji = '�';
         }
+
+        // Debug. Remove it
+        /*let s: string[] = [];
+        let s2: string[] = [];
+        for (let i = 0; i < emoji.length; i++) {
+            s.push(emoji.codePointAt(i).toString(16).toUpperCase());
+            s2.push(emoji.charCodeAt(i).toString(16).toUpperCase());
+        }
+        console.log(emoji, s, s2);*/
+
         return emoji;
     }
 
@@ -1004,10 +1031,48 @@ export class NgxEmojiComponent implements OnDestroy {
     }
 
     /**
-     * See: https://stackoverflow.com/a/41164587/1617101
+     * See: https://habrahabr.ru/company/badoo/blog/282113/
      */
     protected getEmojiRegex(): RegExp {
-        return /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c[\ude01\uddff]|\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c[\ude32\ude02]|\ud83c\ude1a|\ud83c\ude2f|\ud83c[\ude32-\ude3a]|[\ud83c[\ude50\ude3a]|\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/g;
+        let emojiRanges = [
+            '(?:\uD83C[\uDDE6-\uDDFF]){2}', // флаги
+            '[\u0023-\u0039]\u20E3', // числа
+            '(?:[\uD83D\uD83C\uD83E][\uDC00-\uDFFF]|[\u270A-\u270D\u261D\u26F9])\uD83C[\uDFFB-\uDFFF]', // цвет кожи
+
+            // семья и профессии
+            '[\uD83D][\uDC66-\uDC69][\u200D][\uD83D][\uDC66-\uDC69][\u200D][\uD83D][\uDC66-\uDC67]([\u200D][\uD83D][\uDC66-\uDC67])?',
+            '[\uD83D][\uDC68-\uDC69][\u200D][\u2764][\u200D][\uD83D][\uDC68-\uDC69]',
+            '[\uD83D][\uDC68-\uDC69][\u200D][\u2764][\u200D][\uD83D][\uDC8B][\u200D][\uD83D][\uDC68-\uDC69]',
+            '[\uD83D][\uDC68-\uDC69][\u200D][\uD83C-\uD83E][\uDC00-\uDFFF]',
+            '[\uD83C-\uD83E][\uDC00-\uDFFF][\uFE0F]?[\u200D][\u2640-\u2696][\uFE0F]?',
+            '[\uD83D][\uDD75][\uFE0F][\u200D][\u2640][\uFE0F]',
+            '[\uD83D][\uDC68-\uDC69][\u200D][\u2708]',
+            '[\uD83C-\uD83E][\uDC68-\uDC69][\u200D][\uD83C-\uD83E][\uDC66][\u200D][\uD83C-\uD83E][\uDC66]',
+            '[\u26F9][\uFE0F][\u200D][\u2640-\u2696][\uFE0F]',
+
+            '[\uD83D\uD83C\uD83E][\uDC00-\uDFFF]', // суррогатная пара
+            '[\u3297\u3299\u303D\u2B50\u2B55\u2B1B\u27BF\u27A1\u24C2\u25B6\u25C0\u2600\u2705\u21AA\u21A9]', // обычные
+            '[\u203C\u2049\u2122\u2328\u2601\u260E\u261d\u2620\u2626\u262A\u2638\u2639\u263a\u267B\u267F\u2702\u2708]',
+            '[\u2194-\u2199]',
+            '[\u2B05-\u2B07]',
+            '[\u2934-\u2935]',
+            '[\u2795-\u2797]',
+            '[\u2709-\u2764]',
+            '[\u2622-\u2623]',
+            '[\u262E-\u262F]',
+            '[\u231A-\u231B]',
+            '[\u23E9-\u23EF]',
+            '[\u23F0-\u23F4]',
+            '[\u23F8-\u23FA]',
+            '[\u25AA-\u25AB]',
+            '[\u25FB-\u25FE]',
+            '[\u2602-\u2618]',
+            '[\u2648-\u2653]',
+            '[\u2660-\u2668]',
+            '[\u26A0-\u26FA]',
+            '[\u2692-\u269C]'
+        ];
+        return new RegExp(emojiRanges.join('|'), 'g');
     }
 
 }
