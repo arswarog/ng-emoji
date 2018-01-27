@@ -2,35 +2,55 @@ import { OnDestroy, ElementRef, EventEmitter } from '@angular/core';
 import { NgxEmojiService } from "./ngx-emoji.service";
 import { Subscription } from "rxjs/Subscription";
 import { NgxEmojiPickerComponent } from "./ngx-emoji-picker.component";
+import { NgxEmojiElement } from "./ngx-emoji.element";
+import { NgxEmojiFormatter } from "./ngx-emoji.formatter";
+import { NgxEmojiHandler } from "./ngx-emoji.handler";
 export interface EnterOn {
     shift?: boolean;
     ctrl?: boolean;
-}
-export interface SelectionRange {
-    start: number;
-    stop: number;
 }
 export declare enum NgxEmojiEntityType {
     Bold = 0,
     Italic = 1,
     Underline = 2,
+    Strike = 3,
+    Code = 4,
+    Pre = 5,
+    Command = 6,
+    Url = 7,
+    TextLink = 8,
 }
 export interface NgxEmojiEntity {
     type: NgxEmojiEntityType | string;
     offset: number;
     length: number;
+    url?: string;
+}
+export declare class NgxEmojiComponentPrevent {
+    htmlCounter: number;
+    htmlValue: string;
+    fullHtmlCounter: number;
+    fullHtmlValue: string;
+    textCounter: number;
+    textValue: string;
+    entitiesCounter: number;
+    entitiesValue: NgxEmojiEntity[];
+    entitiesStringValue: string;
 }
 export declare class NgxEmojiComponent implements OnDestroy {
-    protected elRef: ElementRef;
     private _contenteditable;
     private _enterOn;
-    private prevent;
+    protected readonly element: NgxEmojiElement;
+    protected readonly formatter: NgxEmojiFormatter;
+    protected readonly handler: NgxEmojiHandler;
     protected emojiService: NgxEmojiService;
     protected emojiServiceSubscription: Subscription;
     protected lastSelectionRange: Range;
-    protected readonly allowedTags: string[];
+    protected preventCounter: number;
+    protected preventSet: NgxEmojiComponentPrevent;
+    protected preventGet: NgxEmojiComponentPrevent;
+    placeholder: string;
     constructor(elRef: ElementRef, globalEmojiService: NgxEmojiService);
-    getNativeElement(): HTMLElement;
     ngOnDestroy(): void;
     addEmojiService(service: NgxEmojiService): void;
     /**
@@ -42,12 +62,12 @@ export declare class NgxEmojiComponent implements OnDestroy {
      */
     protected attrContenteditable: boolean;
     contenteditable: boolean;
-    readonly onContenteditable: EventEmitter<boolean>;
+    readonly contenteditableChange: EventEmitter<boolean>;
     /**
      * Enter on
      */
     enterOn: EnterOn;
-    readonly onEnterOn: EventEmitter<EnterOn>;
+    readonly enterOnChange: EventEmitter<EnterOn>;
     enterKeyIsEnter(): boolean;
     enterKeyIsCtrlEnter(): boolean;
     enterKeyIsShiftEnter(): boolean;
@@ -55,24 +75,22 @@ export declare class NgxEmojiComponent implements OnDestroy {
      * HTML
      */
     fullHtml: string;
-    readonly onFullHtml: EventEmitter<string>;
+    readonly fullHtmlChange: EventEmitter<string>;
     /**
      * HTML wihout parahraphs
      */
     html: string;
-    protected getHtml(rootElement: HTMLElement): string;
-    readonly onHtml: EventEmitter<string>;
+    readonly htmlChange: EventEmitter<string>;
     /**
      * Text
      */
     text: string;
-    readonly onText: EventEmitter<string>;
+    readonly textChange: EventEmitter<string>;
     /**
      * Entities
      */
-    protected normalizeEntityType(type: any): NgxEmojiEntityType;
     entities: NgxEmojiEntity[];
-    readonly onEntities: EventEmitter<NgxEmojiEntity[]>;
+    readonly entitiesChange: EventEmitter<NgxEmojiEntity[]>;
     /**
      * Enter events
      */
@@ -81,6 +99,14 @@ export declare class NgxEmojiComponent implements OnDestroy {
     protected onKeydownControlEnter(event: KeyboardEvent): void;
     protected onKeydownShiftEnter(event: KeyboardEvent): void;
     protected emitEnter(): void;
+    /**
+     * Event command
+     */
+    readonly onCommand: EventEmitter<string>;
+    /**
+     * Event link
+     */
+    readonly onLink: EventEmitter<string>;
     /**
      * Keyboard events
      */
@@ -95,7 +121,7 @@ export declare class NgxEmojiComponent implements OnDestroy {
      * This is fallback
      */
     protected onFocusout(): void;
-    protected onSelectionchange(): void;
+    protected onSelectionChange(): void;
     /**
      * Clipboard events
      */
@@ -109,27 +135,6 @@ export declare class NgxEmojiComponent implements OnDestroy {
     /**
      * Internal
      */
-    protected arrayOfNodeList<T extends Node>(list: NodeListOf<T>): T[];
-    protected isBlockNode(node: Node): boolean;
-    protected isEmojiNode(node: Node): boolean;
-    protected emojiFromNode(node: Node): string;
-    protected replaceSymbolsToEmojis(text: string): string;
-    /**
-     * String replace all implementation
-     *
-     * See: https://stackoverflow.com/a/1144788/1617101
-     */
-    protected replaceAll(str: string, find: string, replace: string): string;
-    protected execCommand(command: string, value?: any): boolean;
-    protected insertNewLine(): void;
-    protected createEmojiImg(emoji: string): string;
-    protected emojiToSymbol(emoji: string): string;
-    protected emojiFromSymbol(symbol: string): string;
+    protected onElementModified(): void;
     protected insertEmoji(emoji: string): void;
-    protected filterHtml(html: string, allowTags?: string[]): string;
-    protected formatText(type: NgxEmojiEntityType): void;
-    /**
-     * See: https://stackoverflow.com/a/41164587/1617101
-     */
-    protected getEmojiRegex(): RegExp;
 }

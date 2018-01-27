@@ -6,7 +6,6 @@ export interface NgxEmojiPickerCategories {
 }
 export declare class NgxEmojiPickerComponent implements OnInit {
     protected emojiService: NgxEmojiService;
-    private Object;
     protected categories: NgxEmojiPickerCategories;
     protected currentCategory: string;
     constructor(emojiService: NgxEmojiService);
@@ -17,4 +16,8 @@ export declare class NgxEmojiPickerComponent implements OnInit {
     selectCategory(category: string): void;
     protected loadCategory(category: string): void;
     protected getEmojis(): NgxEmoji[];
+    protected getCategories(): {
+        name: string;
+        class: string;
+    }[];
 }

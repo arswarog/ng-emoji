@@ -12,10 +12,10 @@ export declare class NgxEmojiService {
     static getEmojis(): NgxEmoji[];
     setActiveComponent(component: NgxEmojiComponent): void;
     isActiveComponent(component: NgxEmojiComponent): boolean;
-    loadEmoji(emoji: string): void;
-    protected getEmojiBundle(emoji: string): number;
-    loadCssBundle(bundleId: number): void;
-    isCssBundleLoaded(bundleId: number): boolean;
+    static loadEmoji(emoji: string): void;
+    protected static getEmojiBundle(emoji: string): number;
+    static loadCssBundle(bundleId: number): void;
+    static isCssBundleLoaded(bundleId: number): boolean;
     recentPush(emoji: string): void;
     getRecent(): string[];
 }
