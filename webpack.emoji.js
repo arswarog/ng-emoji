@@ -71,33 +71,40 @@ const EmojiPlugin = class HelloWorldPlugin {
             let bundleCounter = 0;
 
             let complete = 0;
+
             function buildEmoji(emoji, resolve, reject) {
-                    gm(sheetFile)
-                        .crop(32, 32, emoji.sheet_x * 34 + 1, emoji.sheet_y * 34 + 1)
-                        .noProfile()
-                        .write(imgDir + '/' + emoji.unified + '.png', function (err) {
-                            process.stdout.write(`Complete ${complete++} emojis\r`);
-                            if (err) reject();
-                            resolve();
-                        });
+                gm(sheetFile)
+                    .crop(32, 32, emoji.sheet_x * 34 + 1, emoji.sheet_y * 34 + 1)
+                    .noProfile()
+                    .write(imgDir + '/' + emoji.unified + '.png', function (err) {
+                        process.stdout.write(`Complete ${complete++} emojis\r`);
+                        if (err) reject();
+                        resolve();
+                    });
             }
 
             let queue = async.queue(buildEmoji, maxworkers);
 
             let promises = [];
             for (let emoji of emojis) {
-                promises.push(new Promise((resolve, reject) => queue.push(emoji, resolve, reject)));
-                let codepoint = (emoji.non_qualified) ? emoji.non_qualified : emoji.unified;
-                fs.appendFileSync(
-                    buildPath + '/ngx-emoji-b' + bundle + '.less',
-                    '.ngx-emoji-' + codepoint + ' {background-image: url("img/' + emoji.unified + '.png") !important;}'
-                );
-                json.push({unified: codepoint, category: emoji.category, bundle: bundle});
-                categories.push(emoji.category);
-                bundleCounter++;
-                if (bundleCounter >= bundleLimit) {
-                    bundle++;
-                    bundleCounter = 0;
+                let variations = [emoji];
+                if (emoji.skin_variations) for (let skin of Object.keys(emoji.skin_variations)) {
+                    variations.push(emoji.skin_variations[skin]);
+                }
+                for (let emoji of variations) {
+                    promises.push(new Promise((resolve, reject) => queue.push(emoji, resolve, reject)));
+                    let codepoint = (emoji.non_qualified) ? emoji.non_qualified : emoji.unified;
+                    fs.appendFileSync(
+                        buildPath + '/ngx-emoji-b' + bundle + '.less',
+                        '.ngx-emoji-' + codepoint + ' {background-image: url("img/' + emoji.unified + '.png") !important;}'
+                    );
+                    json.push({unified: codepoint, category: emoji.category, bundle: bundle});
+                    categories.push(emoji.category);
+                    bundleCounter++;
+                    if (bundleCounter >= bundleLimit) {
+                        bundle++;
+                        bundleCounter = 0;
+                    }
                 }
             }
 
@@ -145,7 +152,13 @@ module.exports = {
         'ngx-emoji-b4.min': buildDir + '/ngx-emoji-b4.less',
         'ngx-emoji-b5.min': buildDir + '/ngx-emoji-b5.less',
         'ngx-emoji-b6.min': buildDir + '/ngx-emoji-b6.less',
-        'ngx-emoji-b7.min': buildDir + '/ngx-emoji-b7.less'
+        'ngx-emoji-b7.min': buildDir + '/ngx-emoji-b7.less',
+        'ngx-emoji-b8.min': buildDir + '/ngx-emoji-b8.less',
+        'ngx-emoji-b9.min': buildDir + '/ngx-emoji-b9.less',
+        'ngx-emoji-b10.min': buildDir + '/ngx-emoji-b10.less',
+        'ngx-emoji-b11.min': buildDir + '/ngx-emoji-b11.less',
+        'ngx-emoji-b12.min': buildDir + '/ngx-emoji-b12.less',
+        'ngx-emoji-b13.min': buildDir + '/ngx-emoji-b13.less'
     },
 
     /**

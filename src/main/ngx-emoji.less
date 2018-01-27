@@ -82,3 +82,18 @@ ngx-emoji-picker .ngx-emoji, ngx-emoji-picker .ngx-emoji-cat {
 .ngx-emoji-cat-travel-places {
   background-image: url("./img/categories6.png");
 }
+
+ngx-emoji-with-picker {
+  display: block;
+  position: relative;
+
+  > ngx-emoji-picker {
+    position: absolute;
+    bottom: calc(~"50% + 1em - 2px"); // 2px - border
+    width: 60%;
+    left: 40%;
+    z-index: 100;
+    background-color: white;
+    border: 1px solid red;
+  }
+}

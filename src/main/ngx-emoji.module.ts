@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxEmojiPickerComponent } from './ngx-emoji-picker.component';
 import { NgxEmojiComponent } from './ngx-emoji.component';
+import { NgxEmojiWithPickerComponent } from './ngx-emoji-with-picker.component';
 import { NgxEmojiService } from './ngx-emoji.service';
 import 'ngx-emoji/ngx-emoji.min.css';
 
@@ -10,13 +11,13 @@ import 'ngx-emoji/ngx-emoji.min.css';
         CommonModule
     ],
     declarations: [
-        NgxEmojiPickerComponent, NgxEmojiComponent
+        NgxEmojiPickerComponent, NgxEmojiComponent, NgxEmojiWithPickerComponent
     ],
     providers: [
         NgxEmojiService
     ],
     exports: [
-        NgxEmojiPickerComponent, NgxEmojiComponent
+        NgxEmojiPickerComponent, NgxEmojiComponent, NgxEmojiWithPickerComponent
     ]
 })
 export class NgxEmojiModule {
