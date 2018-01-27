@@ -30,14 +30,14 @@ export class NgxEmojiService {
         return component === this.activeComponent;
     }
 
-    public loadEmoji(emoji: string): void {
+    public static loadEmoji(emoji: string): void {
         let bundleId = this.getEmojiBundle(emoji);
         if (bundleId !== null && !this.isCssBundleLoaded(bundleId)) {
             this.loadCssBundle(bundleId);
         }
     }
 
-    protected getEmojiBundle(emoji: string): number {
+    protected static getEmojiBundle(emoji: string): number {
         for (let e of NgxEmojiService.getEmojis()) {
             if (e.unified == emoji) {
                 return e.bundle;
@@ -46,7 +46,7 @@ export class NgxEmojiService {
         return null;
     }
 
-    public loadCssBundle(bundleId: number): void {
+    public static loadCssBundle(bundleId: number): void {
         if (!this.isCssBundleLoaded(bundleId)) {
             let id = 'ngx-emoji-bundle-' + bundleId;
             let head = document.getElementsByTagName('head')[0];
@@ -60,7 +60,7 @@ export class NgxEmojiService {
         }
     }
 
-    public isCssBundleLoaded(bundleId: number): boolean {
+    public static isCssBundleLoaded(bundleId: number): boolean {
         return (document.getElementById('ngx-emoji-bundle-' + bundleId)) ? true : false;
     }
 

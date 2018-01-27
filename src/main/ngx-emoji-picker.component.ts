@@ -55,7 +55,7 @@ export class NgxEmojiPickerComponent implements OnInit {
             return emoji.category == category;
         });
         for (let emoji of emojis) {
-            this.emojiService.loadEmoji(emoji.unified);
+            NgxEmojiService.loadEmoji(emoji.unified);
         }
         this.categories[category] = emojis;
     }
@@ -68,7 +68,7 @@ export class NgxEmojiPickerComponent implements OnInit {
                 for (let e of NgxEmojiService.getEmojis()) {
                     if (e.unified == emoji) {
                         recent.push(e);
-                        this.emojiService.loadEmoji(e.unified);
+                        NgxEmojiService.loadEmoji(e.unified);
                         break;
                     }
                 }

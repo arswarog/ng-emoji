@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { NgxEmojiComponent, NgxEmojiEntity } from "../main";
 import { isArray } from "util";
+import { NgxEmojiUtils } from "../main/utils";
 
 class ChatMessage {
     text: string = '';
@@ -44,23 +45,13 @@ export class AppComponent {
         emtities: NgxEmojiEntity
     }[] = [];
 
-    /**
-     * String replace all implementation
-     *
-     * See: https://stackoverflow.com/a/1144788/1617101
-     */
-    protected replaceAll(str: string, find: string, replace: string): string {
-        find = find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-        return str.replace(new RegExp(find, 'g'), replace);
-    }
-
     protected printBreakLines(text: string): string {
-        return this.replaceAll(text, '\n', '↵\n');
+        return NgxEmojiUtils.replaceAll(text, '\n', '↵\n');
     }
 
     protected printFormattingMarks(text: string): string {
         text = this.printBreakLines(text);
-        text = this.replaceAll(text, ' ', '°');
+        text = NgxEmojiUtils.replaceAll(text, ' ', '°');
         return text;
     }
 
@@ -85,4 +76,5 @@ export class AppComponent {
         if (this.chatMessages.length > 5)
             this.chatMessages.length = 5;
     }
+
 }
