@@ -1,2 +1,8 @@
-<ngx-emoji-picker #picker [for]="emoji"></ngx-emoji-picker>
-<ngx-emoji text="123" contenteditable="true" [picker]="picker" #emoji></ngx-emoji>
+<ngx-emoji-picker *ngIf="showPicker" [for]="emoji" #picker></ngx-emoji-picker>
+<ngx-emoji #emoji></ngx-emoji>
+<img *ngIf="emoji.contenteditable"
+     aria-hidden="true"
+     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+     alt="Emoji picker"
+     [class]="showPicker ? 'ngx-emoji-cat-smileys-people' : 'ngx-emoji-cat-smileys-people-inactive'"
+     (click)="togglePicker()">

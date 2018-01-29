@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, ElementRef, Input } from '@angular/core';
 import { NgxEmoji, NgxEmojiService } from "./ngx-emoji.service";
 import { NgxEmojiComponent } from "./ngx-emoji.component";
 
@@ -10,7 +10,7 @@ export interface NgxEmojiPickerCategories {
     selector: 'ngx-emoji-picker',
     templateUrl: './ngx-emoji-picker.component.html'
 })
-export class NgxEmojiPickerComponent implements OnInit {
+export class NgxEmojiPickerComponent {
     protected categories: NgxEmojiPickerCategories = {
         Recent: [],
         "Smileys & People": null,
@@ -23,13 +23,13 @@ export class NgxEmojiPickerComponent implements OnInit {
         Flags: null
     };
     protected currentCategory: string = 'Recent';
+    public readonly nativeElement: HTMLElement;
 
     public constructor(
+        elRef: ElementRef,
         protected emojiService: NgxEmojiService
     ) {
-    }
-
-    public ngOnInit(): void {
+        this.nativeElement = elRef.nativeElement;
     }
 
     public setEmojiService(service: NgxEmojiService): void {

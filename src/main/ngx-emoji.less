@@ -3,7 +3,7 @@ ngx-emoji, ngx-emoji-picker {
 }
 
 ngx-emoji {
-  min-height: 1em;
+  min-height: 1.6em;
 
   &:read-only {
     // pretty text
@@ -19,7 +19,7 @@ ngx-emoji .command {
 
 ngx-emoji[contentEditable=true]:empty:not(:focus):before {
   opacity: 0.4;
-  content: attr(data-placeholder)
+  content: attr(data-placeholder);
 }
 
 .ngx-emoji {
@@ -63,7 +63,7 @@ ngx-emoji-picker .ngx-emoji {
 }
 
 .ngx-emoji-cat-recent {
-  background-image: url("./img/categories1.png");
+  background-image: url("./img/categories-recent.png");
 }
 
 .ngx-emoji-cat-activities {
@@ -87,7 +87,11 @@ ngx-emoji-picker .ngx-emoji {
 }
 
 .ngx-emoji-cat-smileys-people {
-  background-image: url("./img/categories2.png");
+  background-image: url("./img/categories-smileys-people.png");
+}
+
+.ngx-emoji-cat-smileys-people-inactive {
+  background-image: url("./img/categories-smileys-people-inactive.png");
 }
 
 .ngx-emoji-cat-symbols {
@@ -104,12 +108,12 @@ ngx-emoji-with-picker {
 
   > ngx-emoji-picker {
     position: absolute;
-    bottom: calc(~"50% + 1em - 2px"); // 2px - border
     width: 15.4em;
+    bottom: calc(~"100% + 1px");
     right: 0;
     z-index: 100;
     background-color: white;
-    border: 1px solid red;
+    border: 1px solid lightgray;
     border-radius: 3px;
     max-height: 13.5em;
     overflow-y: hidden;
@@ -120,5 +124,20 @@ ngx-emoji-with-picker {
       width: 16.4em;
       max-height: 9.3em;
     }
+  }
+
+  > img {
+    .ngx-emoji();
+    width: 1.5em;
+    height: 1.5em;
+    background-size: 1.5em 1.5em;
+    position: absolute;
+    right: 0.5em;
+    top: 0;
+    cursor: pointer;
+  }
+
+  > ngx-emoji:read-write {
+    padding-right: 2.5em;
   }
 }
