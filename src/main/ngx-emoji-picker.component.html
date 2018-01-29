@@ -1,8 +1,10 @@
-<i *ngFor="let emoji of getEmojis()"
-   [class]="'ngx-emoji ngx-emoji-' + emoji.unified"
-   aria-hidden="true"
-   (click)="emojiPicked(emoji.unified)"
-></i>
+<div>
+  <i *ngFor="let emoji of getEmojis()"
+     [class]="'ngx-emoji ngx-emoji-' + emoji.unified"
+     aria-hidden="true"
+     (click)="emojiPicked(emoji.unified)"
+  ></i>
+</div>
 <hr>
 <img *ngFor="let category of getCategories()"
      [class]="'ngx-emoji-cat ' + category.class"

@@ -111,6 +111,14 @@ ngx-emoji-with-picker {
     background-color: white;
     border: 1px solid red;
     border-radius: 3px;
-    //max-height: 13.5em;
+    max-height: 13.5em;
+    overflow-y: hidden;
+    overflow-x: hidden;
+
+    > div {
+      overflow-y: scroll;
+      width: 16.4em;
+      max-height: 9.3em;
+    }
   }
 }
