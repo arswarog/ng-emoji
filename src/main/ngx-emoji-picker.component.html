@@ -6,10 +6,8 @@
   ></i>
 </div>
 <hr>
-<img *ngFor="let category of getCategories()"
+<i *ngFor="let category of getCategories()"
      [class]="'ngx-emoji-cat ' + category.class"
      aria-hidden="true"
-     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
-     [alt]="category.name"
      (click)="selectCategory(category.name)"
->
+></i>

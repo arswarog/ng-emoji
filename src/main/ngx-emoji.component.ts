@@ -421,8 +421,12 @@ export class NgxEmojiComponent implements OnDestroy {
     @HostListener("focusout")
     protected onFocusout(): void {
         //if (document.onselectionchange === undefined) {
-        this.lastSelectionRange = window.getSelection().getRangeAt(0);
         //}
+        let range = window.getSelection().getRangeAt(0);
+        if (this.element.nativeElement.contains(range.startContainer)
+            && this.element.nativeElement.contains(range.endContainer)) {
+            this.lastSelectionRange = range;
+        }
     }
 
     protected onSelectionChange(): void {
@@ -463,7 +467,12 @@ export class NgxEmojiComponent implements OnDestroy {
         let content: DocumentFragment = window.getSelection().getRangeAt(0).cloneContents();
         let div = document.createElement('div');
         div.appendChild(content);
-        div.innerHTML = this.handler.getMarkupHtml(div);
+        div.innerHTML = this.handler.getMarkupHtml(div)
+            .split('\n')
+            .map(function (value) {
+                return '<div>' + value + '</div>';
+            })
+            .join('\n');
         // Copy HTML hack
         document.getElementsByTagName('body')[0].appendChild(div);
         let range = document.createRange();

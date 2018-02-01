@@ -28,14 +28,13 @@ export class NgxEmojiWithPickerComponent {
             return;
         }
         let component = this;
-        let timeout: number;
         picker.nativeElement.addEventListener('mouseleave', function () {
-            timeout = window.setTimeout(function () {
+            let timeout = window.setTimeout(function () {
                 component.showPicker = false;
             }, 1000);
-        });
-        picker.nativeElement.addEventListener('mouseover', function () {
-            window.clearTimeout(timeout);
+            picker.nativeElement.addEventListener('mouseenter', function () {
+                window.clearTimeout(timeout);
+            }, {once: true});
         });
     }
 
