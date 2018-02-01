@@ -1,15 +1,15 @@
-import { OnInit } from '@angular/core';
+import { ElementRef } from '@angular/core';
 import { NgxEmoji, NgxEmojiService } from "./ngx-emoji.service";
 import { NgxEmojiComponent } from "./ngx-emoji.component";
 export interface NgxEmojiPickerCategories {
     [key: string]: NgxEmoji[];
 }
-export declare class NgxEmojiPickerComponent implements OnInit {
+export declare class NgxEmojiPickerComponent {
     protected emojiService: NgxEmojiService;
     protected categories: NgxEmojiPickerCategories;
     protected currentCategory: string;
-    constructor(emojiService: NgxEmojiService);
-    ngOnInit(): void;
+    readonly nativeElement: HTMLElement;
+    constructor(elRef: ElementRef, emojiService: NgxEmojiService);
     setEmojiService(service: NgxEmojiService): void;
     protected inputFor: NgxEmojiComponent;
     protected emojiPicked(emoji: string): void;

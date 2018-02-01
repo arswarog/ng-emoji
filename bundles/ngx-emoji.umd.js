@@ -1519,8 +1519,12 @@ var NgxEmojiComponent = /** @class */ (function () {
      */
     NgxEmojiComponent.prototype.onFocusout = function () {
         //if (document.onselectionchange === undefined) {
-        this.lastSelectionRange = window.getSelection().getRangeAt(0);
         //}
+        var /** @type {?} */ range = window.getSelection().getRangeAt(0);
+        if (this.element.nativeElement.contains(range.startContainer)
+            && this.element.nativeElement.contains(range.endContainer)) {
+            this.lastSelectionRange = range;
+        }
     };
     /**
      * @return {?}
@@ -1565,7 +1569,12 @@ var NgxEmojiComponent = /** @class */ (function () {
         var /** @type {?} */ content = window.getSelection().getRangeAt(0).cloneContents();
         var /** @type {?} */ div = document.createElement('div');
         div.appendChild(content);
-        div.innerHTML = this.handler.getMarkupHtml(div);
+        div.innerHTML = this.handler.getMarkupHtml(div)
+            .split('\n')
+            .map(function (value) {
+            return '<div>' + value + '</div>';
+        })
+            .join('\n');
         // Copy HTML hack
         document.getElementsByTagName('body')[0].appendChild(div);
         var /** @type {?} */ range = document.createRange();
@@ -1694,9 +1703,10 @@ NgxEmojiComponent.propDecorators = {
  */
 var NgxEmojiPickerComponent = /** @class */ (function () {
     /**
+     * @param {?} elRef
      * @param {?} emojiService
      */
-    function NgxEmojiPickerComponent(emojiService) {
+    function NgxEmojiPickerComponent(elRef, emojiService) {
         this.emojiService = emojiService;
         this.categories = {
             Recent: [],
@@ -1710,12 +1720,8 @@ var NgxEmojiPickerComponent = /** @class */ (function () {
             Flags: null
         };
         this.currentCategory = 'Recent';
+        this.nativeElement = elRef.nativeElement;
     }
-    /**
-     * @return {?}
-     */
-    NgxEmojiPickerComponent.prototype.ngOnInit = function () {
-    };
     /**
      * @param {?} service
      * @return {?}
@@ -1839,11 +1845,12 @@ var NgxEmojiPickerComponent = /** @class */ (function () {
 NgxEmojiPickerComponent.decorators = [
     { type: core.Component, args: [{
                 selector: 'ngx-emoji-picker',
-                template: "<i *ngFor=\"let emoji of getEmojis()\"\n   [class]=\"'ngx-emoji ngx-emoji-' + emoji.unified\"\n   aria-hidden=\"true\"\n   (click)=\"emojiPicked(emoji.unified)\"\n></i>\n<hr>\n<img *ngFor=\"let category of getCategories()\"\n     [class]=\"'ngx-emoji-cat ' + category.class\"\n     aria-hidden=\"true\"\n     src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=\"\n     [alt]=\"category.name\"\n     (click)=\"selectCategory(category.name)\"\n>\n"
+                template: "<div>\n  <i *ngFor=\"let emoji of getEmojis()\"\n     [class]=\"'ngx-emoji ngx-emoji-' + emoji.unified\"\n     aria-hidden=\"true\"\n     (click)=\"emojiPicked(emoji.unified)\"\n  ></i>\n</div>\n<hr>\n<i *ngFor=\"let category of getCategories()\"\n     [class]=\"'ngx-emoji-cat ' + category.class\"\n     aria-hidden=\"true\"\n     (click)=\"selectCategory(category.name)\"\n></i>\n"
             },] },
 ];
 /** @nocollapse */
 NgxEmojiPickerComponent.ctorParameters = function () { return [
+    { type: core.ElementRef, },
     { type: NgxEmojiService, },
 ]; };
 NgxEmojiPickerComponent.propDecorators = {
@@ -1854,19 +1861,288 @@ NgxEmojiPickerComponent.propDecorators = {
  * @suppress {checkTypes} checked by tsc
  */
 var NgxEmojiWithPickerComponent = /** @class */ (function () {
-    function NgxEmojiWithPickerComponent() {
+    /**
+     * @param {?} elRef
+     */
+    function NgxEmojiWithPickerComponent(elRef) {
+        this.elRef = elRef;
+        this.showPicker = false;
     }
+    /**
+     * @return {?}
+     */
+    NgxEmojiWithPickerComponent.prototype.togglePicker = function () {
+        this.showPicker = !this.showPicker;
+    };
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "pickerComponent", {
+        /**
+         * @param {?} picker
+         * @return {?}
+         */
+        set: function (picker) {
+            if (!picker) {
+                return;
+            }
+            var /** @type {?} */ component = this;
+            picker.nativeElement.addEventListener('mouseleave', function () {
+                var /** @type {?} */ timeout = window.setTimeout(function () {
+                    component.showPicker = false;
+                }, 1000);
+                picker.nativeElement.addEventListener('mouseenter', function () {
+                    window.clearTimeout(timeout);
+                }, { once: true });
+            });
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "placeholder", {
+        /**
+         * @param {?} value
+         * @return {?}
+         */
+        set: function (value) {
+            this.emojiComponent.placeholder = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "attrContenteditable", {
+        /**
+         * @param {?} editable
+         * @return {?}
+         */
+        set: function (editable) {
+            this.emojiComponent.contenteditable = editable;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "contenteditable", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.contenteditable;
+        },
+        /**
+         * @param {?} editable
+         * @return {?}
+         */
+        set: function (editable) {
+            this.emojiComponent.contenteditable = editable;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "contenteditableChange", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.contenteditableChange;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "enterOn", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.enterOn;
+        },
+        /**
+         * @param {?} enterOn
+         * @return {?}
+         */
+        set: function (enterOn) {
+            this.emojiComponent.enterOn = enterOn;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "enterOnChange", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.enterOnChange;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "fullHtml", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.fullHtml;
+        },
+        /**
+         * @param {?} html
+         * @return {?}
+         */
+        set: function (html) {
+            this.emojiComponent.fullHtml = html;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "fullHtmlChange", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.fullHtmlChange;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "html", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.html;
+        },
+        /**
+         * @param {?} html
+         * @return {?}
+         */
+        set: function (html) {
+            this.emojiComponent.html = html;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "htmlChange", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.htmlChange;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "text", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.text;
+        },
+        /**
+         * @param {?} text
+         * @return {?}
+         */
+        set: function (text) {
+            this.emojiComponent.text = text;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "textChange", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.textChange;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "entities", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.entities;
+        },
+        /**
+         * @param {?} entities
+         * @return {?}
+         */
+        set: function (entities) {
+            this.emojiComponent.entities = entities;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "entitiesChange", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.entitiesChange;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "onEnter", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.onEnter;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "onCommand", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.onCommand;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgxEmojiWithPickerComponent.prototype, "onLink", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this.emojiComponent.onLink;
+        },
+        enumerable: true,
+        configurable: true
+    });
     return NgxEmojiWithPickerComponent;
 }());
 NgxEmojiWithPickerComponent.decorators = [
     { type: core.Component, args: [{
                 selector: 'ngx-emoji-with-picker',
-                template: "<ngx-emoji-picker #picker [for]=\"emoji\"></ngx-emoji-picker>\n<ngx-emoji text=\"123\" contenteditable=\"true\" [picker]=\"picker\" #emoji></ngx-emoji>\n"
+                template: "<ngx-emoji-picker *ngIf=\"showPicker\" [for]=\"emoji\" #picker></ngx-emoji-picker>\n<ngx-emoji #emoji></ngx-emoji>\n<img *ngIf=\"emoji.contenteditable\"\n     aria-hidden=\"true\"\n     src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=\"\n     alt=\"Emoji picker\"\n     [class]=\"showPicker ? 'ngx-emoji-cat-smileys-people' : 'ngx-emoji-cat-smileys-people-inactive'\"\n     (click)=\"togglePicker()\">\n"
             },] },
 ];
-//
 /** @nocollapse */
-NgxEmojiWithPickerComponent.ctorParameters = function () { return []; };
+NgxEmojiWithPickerComponent.ctorParameters = function () { return [
+    { type: core.ElementRef, },
+]; };
+NgxEmojiWithPickerComponent.propDecorators = {
+    "emojiComponent": [{ type: core.ViewChild, args: ['emoji',] },],
+    "pickerComponent": [{ type: core.ViewChild, args: ['picker',] },],
+    "placeholder": [{ type: core.Input, args: ['placeholder',] },],
+    "attrContenteditable": [{ type: core.Input, args: ['attr.contenteditable',] },],
+    "contenteditable": [{ type: core.Input, args: ['contenteditable',] },],
+    "contenteditableChange": [{ type: core.Output, args: ['contenteditableChange',] },],
+    "enterOn": [{ type: core.Input, args: ['enterOn',] },],
+    "enterOnChange": [{ type: core.Output, args: ['enterOnChange',] },],
+    "fullHtml": [{ type: core.Input, args: ['fullHtml',] },],
+    "fullHtmlChange": [{ type: core.Output, args: ['fullHtmlChange',] },],
+    "html": [{ type: core.Input, args: ['html',] },],
+    "htmlChange": [{ type: core.Output, args: ['htmlChange',] },],
+    "text": [{ type: core.Input, args: ['text',] },],
+    "textChange": [{ type: core.Output, args: ['textChange',] },],
+    "entities": [{ type: core.Input, args: ['entities',] },],
+    "entitiesChange": [{ type: core.Output, args: ['entitiesChange',] },],
+    "onEnter": [{ type: core.Output, args: ['enter',] },],
+    "onCommand": [{ type: core.Output, args: ['command',] },],
+    "onLink": [{ type: core.Output, args: ['link',] },],
+};
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc

@@ -1,6 +1,6 @@
 {
   "name": "ngx-emoji",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Components with Emoji for Angular 4+",
   "repository": {
     "type": "git",
@@ -58,12 +58,12 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@angular/common": "5.2.2",
-    "@angular/compiler": "5.2.2",
-    "@angular/compiler-cli": "5.2.2",
-    "@angular/core": "5.2.2",
-    "@angular/platform-browser": "5.2.2",
-    "@angular/platform-browser-dynamic": "5.2.2",
+    "@angular/common": "5.2.3",
+    "@angular/compiler": "5.2.3",
+    "@angular/compiler-cli": "5.2.3",
+    "@angular/core": "5.2.3",
+    "@angular/platform-browser": "5.2.3",
+    "@angular/platform-browser-dynamic": "5.2.3",
     "@types/node": "9.4.0",
     "angular2-template-loader": "0.6.2",
     "awesome-typescript-loader": "3.4.1",
