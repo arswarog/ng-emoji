@@ -1,4 +1,4 @@
-import { Component, ViewChild, Input, Output, EventEmitter, HostListener, ElementRef } from "@angular/core";
+import { Component, ViewChild, Input, Output, EventEmitter, ElementRef, OnInit } from "@angular/core";
 import { EnterOn, NgxEmojiComponent, NgxEmojiEntity } from "./ngx-emoji.component";
 import { NgxEmojiPickerComponent } from "./ngx-emoji-picker.component";
 
@@ -6,7 +6,7 @@ import { NgxEmojiPickerComponent } from "./ngx-emoji-picker.component";
     selector: 'ngx-emoji-with-picker',
     templateUrl: './ngx-emoji-with-picker.component.html'
 })
-export class NgxEmojiWithPickerComponent {
+export class NgxEmojiWithPickerComponent implements OnInit {
 
     @ViewChild('emoji')
     protected emojiComponent: NgxEmojiComponent;
@@ -16,6 +16,18 @@ export class NgxEmojiWithPickerComponent {
     public constructor(
         protected elRef: ElementRef
     ) {
+    }
+
+    public ngOnInit(): void {
+        this.emojiComponent.contenteditableChange.subscribe((value: boolean) => this.contenteditableChange.emit(value));
+        this.emojiComponent.enterOnChange.subscribe((value: EnterOn) => this.enterOnChange.emit(value));
+        this.emojiComponent.fullHtmlChange.subscribe((value: string) => this.fullHtmlChange.emit(value));
+        this.emojiComponent.htmlChange.subscribe((value: string) => this.htmlChange.emit(value));
+        this.emojiComponent.textChange.subscribe((value: string) => this.textChange.emit(value));
+        this.emojiComponent.entitiesChange.subscribe((value: NgxEmojiEntity[]) => this.entitiesChange.emit(value));
+        this.emojiComponent.onEnter.subscribe(() => this.onEnter.emit());
+        this.emojiComponent.onCommand.subscribe((value: string) => this.onCommand.emit(value));
+        this.emojiComponent.onLink.subscribe((value: string) => this.onLink.emit(value));
     }
 
     public togglePicker(): void {
@@ -65,9 +77,7 @@ export class NgxEmojiWithPickerComponent {
     }
 
     @Output('contenteditableChange')
-    public get contenteditableChange(): EventEmitter<boolean> {
-        return this.emojiComponent.contenteditableChange;
-    }
+    public readonly contenteditableChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
     @Input('enterOn')
     public set enterOn(enterOn: EnterOn) {
@@ -79,9 +89,7 @@ export class NgxEmojiWithPickerComponent {
     }
 
     @Output('enterOnChange')
-    public get enterOnChange(): EventEmitter<EnterOn> {
-        return this.emojiComponent.enterOnChange;
-    }
+    public readonly enterOnChange: EventEmitter<EnterOn> = new EventEmitter<EnterOn>();
 
     @Input('fullHtml')
     public set fullHtml(html: string) {
@@ -93,9 +101,7 @@ export class NgxEmojiWithPickerComponent {
     }
 
     @Output('fullHtmlChange')
-    public get fullHtmlChange(): EventEmitter<string> {
-        return this.emojiComponent.fullHtmlChange;
-    }
+    public readonly fullHtmlChange: EventEmitter<string> = new EventEmitter<string>();
 
     @Input('html')
     public set html(html: string) {
@@ -107,9 +113,7 @@ export class NgxEmojiWithPickerComponent {
     }
 
     @Output('htmlChange')
-    public get htmlChange(): EventEmitter<string> {
-        return this.emojiComponent.htmlChange;
-    }
+    public readonly htmlChange: EventEmitter<string> = new EventEmitter<string>();
 
     @Input('text')
     public set text(text: string) {
@@ -121,9 +125,7 @@ export class NgxEmojiWithPickerComponent {
     }
 
     @Output('textChange')
-    public get textChange(): EventEmitter<string> {
-        return this.emojiComponent.textChange;
-    }
+    public readonly textChange: EventEmitter<string> = new EventEmitter<string>();
 
     @Input('entities')
     public set entities(entities: NgxEmojiEntity[]) {
@@ -135,23 +137,15 @@ export class NgxEmojiWithPickerComponent {
     }
 
     @Output('entitiesChange')
-    public get entitiesChange(): EventEmitter<NgxEmojiEntity[]> {
-        return this.emojiComponent.entitiesChange;
-    }
+    public readonly entitiesChange: EventEmitter<NgxEmojiEntity[]> = new EventEmitter<NgxEmojiEntity[]>();
 
     @Output('enter')
-    public get onEnter(): EventEmitter<void> {
-        return this.emojiComponent.onEnter;
-    }
+    public readonly onEnter: EventEmitter<void> = new EventEmitter<void>();
 
     @Output('command')
-    public get onCommand(): EventEmitter<string> {
-        return this.emojiComponent.onCommand;
-    }
+    public readonly onCommand: EventEmitter<string> = new EventEmitter<string>();
 
     @Output('link')
-    public get onLink(): EventEmitter<string> {
-        return this.emojiComponent.onLink;
-    }
+    public readonly onLink: EventEmitter<string> = new EventEmitter<string>();
 
 }
