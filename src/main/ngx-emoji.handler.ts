@@ -338,6 +338,7 @@ export class NgxEmojiHandler {
             case 'pre':
             case NgxEmojiEntityType.Pre:
                 return NgxEmojiEntityType.Pre;
+            case 'bot_command':
             case 'command':
             case NgxEmojiEntityType.Command:
                 return NgxEmojiEntityType.Command;

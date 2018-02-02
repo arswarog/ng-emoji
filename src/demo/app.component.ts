@@ -4,31 +4,34 @@ import { isArray } from "util";
 import { NgxEmojiUtils } from "../main/utils";
 
 class ChatMessage {
-    text: string = '';
+    text: string               = '';
     entities: NgxEmojiEntity[] = [];
 
     constructor(text: string = '', entities: NgxEmojiEntity[] = []) {
-        this.text = text;
+        this.text     = text;
         this.entities = entities;
     }
 }
 
 @Component({
-    selector: 'body',
+    selector   : 'body',
     templateUrl: './app.html'
 })
 export class AppComponent {
 
     // ChatDemo
-    public sendByShift = false;
+    public sendByShift                 = false;
     public chatMessages: ChatMessage[] = [
-        new ChatMessage('Now messages is perfect!', [ {
-            type   : 'bold',
-            offset : 16,
-            length : 7,
-        } ]),
+        new ChatMessage('Now messages is perfect!', [{
+            type  : 'bold',
+            offset: 16,
+            length: 7
+        }])
     ];
-    public newMessage: ChatMessage = new ChatMessage();
+
+    public alert = alert;
+
+    public newMessage: ChatMessage     = new ChatMessage();
 
     // Global
     protected window = window;
@@ -71,10 +74,17 @@ export class AppComponent {
 
     // ChatDemo functions
     public sendMessage() {
-        this.chatMessages.unshift(this.newMessage);
-        this.newMessage = this.newMessage;
+        this.chatMessages.push(this.newMessage);
+        this.newMessage = new ChatMessage();
         if (this.chatMessages.length > 5)
-            this.chatMessages.length = 5;
+            this.chatMessages = this.chatMessages.slice(0, 5);
     }
 
+    // Long post demo functions
+    public longPostText: string = '';
+
+    public longPost(text: string) {
+        alert(text);
+        this.longPostText = ''
+    }
 }

@@ -17,15 +17,15 @@
 
                         <div class="row mb-3 chat-demo">
                             <div class="col-md-10">
-                                <ngx-emoji class="send-message"
-                                           placeholder="Your message"
-                                           contenteditable="true"
-                                           [(text)]="newMessage.text"
-                                           [(entities)]="newMessage.entities"
-                                           (enter)="sendMessage()"
-                                           [enterOn]="{shift: sendByShift, ctrl: false}"
-                                           #chatDemo
-                                ></ngx-emoji>
+                                <ngx-emoji-with-picker class="send-message"
+                                                       placeholder="Your message"
+                                                       contenteditable="true"
+                                                       [(text)]="newMessage.text"
+                                                       (entities)="newMessage.entities"
+                                                       (enter)="sendMessage()"
+                                                       [enterOn]="{shift: sendByShift, ctrl: false}"
+                                                       #chatDemo
+                                ></ngx-emoji-with-picker>
                             </div>
                             <div class="col-md-2">
                                 <button type="button" class="btn btn-sm btn-primary" (click)="sendMessage()">
@@ -144,6 +144,8 @@
                         <ngx-emoji class="post"
                                    contenteditable="true"
                                    [text]="'Text'"
+                                   (enter)="longPost($event)"
+                                   [enterOn]="{shift: false, ctrl: true}"
                         ></ngx-emoji>
                     </div>
                     <div class="col-md-4">
@@ -200,12 +202,17 @@
                     <div class="card-header">View</div>
                     <div class="card-body">
                         <ngx-emoji
-                                [text]="'Pretty text\nLine 2 ☕'"
+                                [text]="'Pretty text\nLine 2 ☕\n/command\nThis is url\nhttps://textapps.io'"
                                 [entities]="[
                                 {offset: 0, length: 6, type: 'italic'},
                                 {offset: 7, length: 4, type: 'bold'},
-                                {offset: 12, length: 6, type: 'underline'}
+                                {offset: 12, length: 6, type: 'underline'},
+                                {offset: 21, length: 8, type: 'bot_command'},
+                                {offset: 30, length: 11, type: 'text_link', url: 'https://textapps.io'},
+                                {offset: 42, length: 19, type: 'url'}
                             ]"
+                            (command)="alert('Command: '+$event)"
+                            (link)="alert('Link: '+$event)"
                         ></ngx-emoji>
                     </div>
                     <div class="card-footer">
@@ -214,7 +221,10 @@
     [entities]="[
         &#123;offset: 0, length: 6, type: 'italic'&#125;,
         &#123;offset: 7, length: 4, type: 'bold'&#125;,
-        &#123;offset: 12, length: 6, type: 'underline'&#125;
+        &#123;offset: 12, length: 6, type: 'underline'&#125;,
+        &#123;offset: 21, length: 8, type: 'bot_command'&#125;,
+        &#123;offset: 30, length: 11, type: 'text_link', url: 'https://textapps.io'&#125;,
+        &#123;offset: 42, length: 19, type: 'url'&#125;
     ]"
 &gt;&lt;/ngx-emoji&gt;</code></pre>
                     </div>

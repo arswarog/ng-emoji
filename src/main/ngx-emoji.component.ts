@@ -422,6 +422,7 @@ export class NgxEmojiComponent implements OnDestroy {
     protected onFocusout(): void {
         //if (document.onselectionchange === undefined) {
         //}
+        console.log(window.getSelection());
         let range = window.getSelection().getRangeAt(0);
         if (this.element.nativeElement.contains(range.startContainer)
             && this.element.nativeElement.contains(range.endContainer)) {
