@@ -71,7 +71,7 @@ export class NgxEmojiComponent implements OnDestroy {
 
     @Input('placeholder')
     public set placeholder(value: string) {
-        this.element.nativeElement.setAttribute('placeholder', value);
+        this.element.nativeElement.dataset['placeholder'] = value;
     }
 
     public constructor(
@@ -422,7 +422,6 @@ export class NgxEmojiComponent implements OnDestroy {
     protected onFocusout(): void {
         //if (document.onselectionchange === undefined) {
         //}
-        console.log(window.getSelection());
         let range = window.getSelection().getRangeAt(0);
         if (this.element.nativeElement.contains(range.startContainer)
             && this.element.nativeElement.contains(range.endContainer)) {
@@ -451,9 +450,12 @@ export class NgxEmojiComponent implements OnDestroy {
             html = event.clipboardData.getData('text/plain');
         }
         html = html.split('\n').map(function (line, index) {
+            if (line.trim().length == 0) {
+                line = '<br>';
+            }
             return (index > 0) ? '<div>' + line + '</div>' : line;
-        }).join('');
-        html = NgxEmojiUtils.filterHtml(html, this.handler.allowedTags.concat(['div']));
+        }).join('\n');
+        html = NgxEmojiUtils.filterHtml(html, this.handler.allowedTags.concat(['div', 'br']));
         html = NgxEmojiHelper.replaceSymbolsToEmojis(html);
         this.element.execCommand('insertHTML', html);
     }
@@ -471,6 +473,9 @@ export class NgxEmojiComponent implements OnDestroy {
         div.innerHTML = this.handler.getMarkupHtml(div)
             .split('\n')
             .map(function (value) {
+                if (value.trim().length == 0) {
+                    value = '<br>';
+                }
                 return '<div>' + value + '</div>';
             })
             .join('\n');

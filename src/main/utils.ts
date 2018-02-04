@@ -38,7 +38,9 @@ export class NgxEmojiUtils {
         let rf = function (nodes: NodeList): void {
             for (let node of NgxEmojiUtils.arrayOfNodeList(nodes)) {
                 if (node.nodeType == node.ELEMENT_NODE) {
-                    if (allowTags.indexOf(node.nodeName) > -1
+                    if (node.nodeName == 'BR' && allowTags.indexOf(node.nodeName) > -1) {
+                        html += '<br>';
+                    } else if (allowTags.indexOf(node.nodeName) > -1
                         || withCommands && (node as HTMLElement).classList.contains('command')) {
                         if (node instanceof HTMLAnchorElement) {
                             html += '<' + node.nodeName.toLowerCase() + ' href="' + node.getAttribute('href') + '">';

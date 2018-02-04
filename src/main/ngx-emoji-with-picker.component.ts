@@ -64,12 +64,13 @@ export class NgxEmojiWithPickerComponent implements OnInit {
 
     @Input('attr.contenteditable')
     protected set attrContenteditable(editable: boolean) {
-        this.emojiComponent.contenteditable = editable;
+        this.contenteditable = editable;
     }
 
     @Input('contenteditable')
     public set contenteditable(editable: boolean) {
         this.emojiComponent.contenteditable = editable;
+        this.elRef.nativeElement.setAttribute('contenteditable', false);
     }
 
     public get contenteditable(): boolean {
