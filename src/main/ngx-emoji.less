@@ -1,0 +1,144 @@
+ngx-emoji, ngx-emoji-picker {
+  display: block;
+}
+
+ngx-emoji {
+  min-height: 1.6em;
+
+  &:read-only {
+    // pretty text
+  }
+  &:read-write {
+    // input text
+  }
+}
+
+ngx-emoji .command {
+  color: blue;
+  cursor: pointer;
+}
+
+ngx-emoji[contentEditable=true]:empty:not(:focus):before {
+  opacity: 0.4;
+  content: attr(data-placeholder);
+}
+
+.ngx-emoji {
+  display: inline-block;
+  width: 0px;
+  height: 1.2em;
+  background-size: 1.2em 1.2em;
+  background-repeat: no-repeat;
+  background-position: center center;
+  padding-left: 0.7em;
+  padding-right: 0.7em;
+  position: relative;
+  bottom: 0.1em;
+}
+
+.ngx-emoji {
+  background-image: url(data:image/gif;base64,R0lGODlhEAAQAPIAAP///4iIiOLi4qampoiIiLW1tcTExMvLyyH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==);
+}
+
+ngx-emoji-picker {
+  line-height: 0;
+}
+
+ngx-emoji-picker hr {
+  margin: 0 0.4em 0.2em 0.4em;
+}
+
+ngx-emoji-picker .ngx-emoji, ngx-emoji-picker .ngx-emoji-cat {
+  cursor: pointer;
+}
+
+ngx-emoji-picker .ngx-emoji {
+  margin: 0.25em 0.14em 0.1em;
+}
+
+.ngx-emoji-cat {
+  .ngx-emoji();
+  width: 1.68em;
+  height: 1.68em;
+  background-size: 1.6em 1.6em;
+}
+
+.ngx-emoji-cat-recent {
+  background-image: url("./img/categories-recent.png");
+}
+
+.ngx-emoji-cat-activities {
+  background-image: url("./img/categories7.png");
+}
+
+.ngx-emoji-cat-animals-nature {
+  background-image: url("./img/categories3.png");
+}
+
+.ngx-emoji-cat-flags {
+  background-image: url("./img/categories9.png");
+}
+
+.ngx-emoji-cat-food-drink {
+  background-image: url("./img/categories4.png");
+}
+
+.ngx-emoji-cat-objects {
+  background-image: url("./img/categories5.png");
+}
+
+.ngx-emoji-cat-smileys-people {
+  background-image: url("./img/categories-smileys-people.png");
+}
+
+.ngx-emoji-cat-smileys-people-inactive {
+  background-image: url("./img/categories-smileys-people-inactive.png");
+}
+
+.ngx-emoji-cat-symbols {
+  background-image: url("./img/categories8.png");
+}
+
+.ngx-emoji-cat-travel-places {
+  background-image: url("./img/categories6.png");
+}
+
+ngx-emoji-with-picker {
+  display: block;
+  position: relative;
+
+  > ngx-emoji-picker {
+    position: absolute;
+    width: 15.4em;
+    bottom: calc(~"100% + 1px");
+    right: 0;
+    z-index: 100;
+    background-color: white;
+    border: 1px solid lightgray;
+    border-radius: 3px;
+    max-height: 13.5em;
+    overflow-y: hidden;
+    overflow-x: hidden;
+
+    > div {
+      overflow-y: scroll;
+      width: 16.4em;
+      max-height: 9.3em;
+    }
+  }
+
+  > img {
+    .ngx-emoji();
+    width: 1.5em;
+    height: 1.5em;
+    background-size: 1.5em 1.5em;
+    position: absolute;
+    right: 0.35em;
+    bottom: 0.35em;
+    cursor: pointer;
+  }
+
+  > ngx-emoji:read-write {
+    padding-right: 2.5em;
+  }
+}

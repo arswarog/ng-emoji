@@ -1,11 +1,7 @@
 {
   "name": "ngx-emoji",
-  "version": "0.0.1",
+  "version": "0.2.9",
   "description": "Components with Emoji for Angular 4+",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arswarog/ngx-emoji.git"
@@ -21,5 +17,85 @@
   "bugs": {
     "url": "https://github.com/arswarog/ngx-emoji/issues"
   },
-  "homepage": "https://github.com/arswarog/ngx-emoji#readme"
+  "homepage": "https://github.com/arswarog/ngx-emoji#readme",
+  "$schema": "./node_modules/ng-packagr/package.schema.json",
+  "ngPackage": {
+    "lib": {
+      "entryFile": "src/main/index.ts"
+    }
+  },
+  "files": [
+    "ngx-emoji.min.css",
+    "ngx-emoji.min.css.map",
+    "ngx-emoji-assets/*",
+    "emojis.json",
+    "bundles/*",
+    "esm2015/*",
+    "esm5",
+    "*.d.ts",
+    "*.metadata.json"
+  ],
+  "scripts": {
+    "rimraf": "rimraf",
+    "ng-packagr": "ng-packagr",
+    "clean:package": "npm run rimraf -- dist",
+    "clean:demo": "npm run rimraf -- dist-demo",
+    "clean:emoji": "npm run rimraf -- build-emoji",
+    "clean": "npm run clean:package && npm run clean:demo && npm run clean:emoji",
+    "clean:all": "npm run clean && npm run rimraf -- node_modules npm-debug.log package-lock.json",
+    "lint": "tslint -p package.json",
+    "prebuild:package": "npm run clean:package && npm run lint",
+    "prebuild:demo": "npm run clean:demo",
+    "prebuild:emoji": "npm run clean:emoji",
+    "build:package": "ng-packagr -p package.json",
+    "postbuild:package": "cpy build-emoji/ngx-emoji.min.css* dist && cpy build-emoji/emojis.json dist && cpy build-emoji/ngx-emoji-b*.css* dist/ngx-emoji-assets",
+    "build:demo": "webpack --config webpack.demo.js --progress --profile --bail",
+    "postbuild:demo": "cpy build-emoji/ngx-emoji-b*.css* dist-demo/ngx-emoji-assets",
+    "build:emoji": "node --stack-size=65500 node_modules/.bin/webpack --config webpack.emoji.js --progress --profile --bail",
+    "build": "npm run build:emoji && npm run build:package && npm run build:demo",
+    "start:demo": "webpack-dev-server --config webpack.demo.js --progress --profile",
+    "start": "npm run start:demo"
+  },
+  "peerDependencies": {
+    "@angular/core": ">=2.0.0 <6",
+    "@angular/common": ">=2.0.0 <6",
+    "rxjs": ">=5.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@angular/common": "5.2.3",
+    "@angular/compiler": "5.2.3",
+    "@angular/compiler-cli": "5.2.3",
+    "@angular/core": "5.2.3",
+    "@angular/platform-browser": "5.2.3",
+    "@angular/platform-browser-dynamic": "5.2.3",
+    "@types/node": "9.4.0",
+    "angular2-template-loader": "0.6.2",
+    "awesome-typescript-loader": "3.4.1",
+    "bootstrap": "4.0.0",
+    "core-js": "2.5.3",
+    "cpy-cli": "1.0.1",
+    "css-loader": "0.28.9",
+    "emoji-datasource": "4.0.3",
+    "extract-text-webpack-plugin": "3.0.2",
+    "file-loader": "1.1.6",
+    "gm": "1.23.1",
+    "html-webpack-plugin": "2.30.1",
+    "less": "2.7.3",
+    "less-loader": "4.0.5",
+    "ng-packagr": "2.0.0-rc.12",
+    "raw-loader": "0.5.1",
+    "rimraf": "2.6.2",
+    "rxjs": "5.5.6",
+    "string-replace-loader": "1.3.0",
+    "style-loader": "0.20.1",
+    "tslint": "5.9.1",
+    "tslint-loader": "3.5.3",
+    "typescript": "2.6.2",
+    "url-loader": "0.6.2",
+    "webpack": "3.10.0",
+    "webpack-dev-server": "2.11.1",
+    "zone.js": "0.8.20",
+    "async": "2.6.0"
+  }
 }

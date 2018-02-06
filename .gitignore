@@ -1,2 +1,7 @@
 /.idea/
 /ngx-emoji.iml
+/node_modules/
+/package-lock.json
+/dist/
+/dist-demo/
+/build-emoji/
